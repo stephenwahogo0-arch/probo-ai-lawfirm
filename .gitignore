@@ -1,0 +1,36 @@
+
+# Logs
+/tmp/
+*.log
+backend.log
+dev_output.log
+dev_server.log
+
+# Node
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+backend/vortex_law.db
+
+# Secrets
+.env
+.env.*
+! .env.example
+backend/.env
+
+# Editor
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

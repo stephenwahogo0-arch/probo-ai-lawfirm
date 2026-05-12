@@ -1,0 +1,85 @@
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Cinzel:wght@400;600;700;900&display=swap");
+
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    /* PROBO LAW FIRM — ECO-NATURAL PALETTE */
+    --background: 40 30% 98%; /* Cream */
+    --foreground: 120 15% 15%; /* Deep Moss */
+    
+    --muted: 40 20% 92%;
+    --muted-foreground: 120 10% 40%;
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 120 15% 15%;
+    
+    --border: 120 10% 85%;
+    --input: 120 10% 85%;
+    
+    --card: 0 0% 100%;
+    --card-foreground: 120 15% 15%;
+    
+    --primary: 90 25% 45%; /* Sage Green */
+    --primary-foreground: 40 30% 98%;
+    
+    --secondary: 25 20% 85%; /* Clay Beige */
+    --secondary-foreground: 120 15% 15%;
+    
+    --accent: 90 20% 40%;
+    --accent-foreground: 40 30% 98%;
+    
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 0 0% 98%;
+    
+    --ring: 90 25% 45%;
+    --radius: 0.75rem;
+
+    --font-sans: 'Inter', system-ui, sans-serif;
+    --font-display: 'Cinzel', serif;
+  }
+
+  .dark {
+    --background: 120 15% 10%;
+    --foreground: 40 20% 90%;
+    /* Add dark mode variations if needed, but we focus on the natural look */
+  }
+}
+
+@theme {
+  --font-sans: var(--font-sans);
+  --font-display: var(--font-display);
+  
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display;
+  }
+}
