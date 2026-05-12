@@ -1,6 +1,6 @@
 
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, FileText, MessageSquare, Scale, Zap, Send, Loader2, ShieldCheck, DollarSign, Smartphone } from 'lucide-react';
+import { ArrowLeft, FileText, MessageSquare, Scale, Zap, Send, Loader2, ShieldCheck, DollarSign, Smartphone, CreditCard, Wallet, Landmark, Globe, Bitcoin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -94,24 +94,24 @@ export default function CaseDetailPage() {
         </div>
       </div>
 
-      <div className="flex gap-2 p-1 bg-muted rounded-lg w-fit">
+      <div className="flex gap-2 p-1 bg-muted rounded-lg w-fit overflow-x-auto max-w-full">
         <button 
           onClick={() => setActiveTab('report')}
-          className={cn("px-4 py-2 text-sm font-medium rounded-md transition-all flex items-center gap-2", 
+          className={cn("px-4 py-2 text-sm font-medium rounded-md transition-all flex items-center gap-2 shrink-0", 
             activeTab === 'report' ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}
         >
           <FileText className="h-4 w-4" /> Strategic Report
         </button>
         <button 
           onClick={() => setActiveTab('chat')}
-          className={cn("px-4 py-2 text-sm font-medium rounded-md transition-all flex items-center gap-2", 
+          className={cn("px-4 py-2 text-sm font-medium rounded-md transition-all flex items-center gap-2 shrink-0", 
             activeTab === 'chat' ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}
         >
           <MessageSquare className="h-4 w-4" /> Neural Link
         </button>
         <button 
           onClick={() => setActiveTab('payment')}
-          className={cn("px-4 py-2 text-sm font-medium rounded-md transition-all flex items-center gap-2", 
+          className={cn("px-4 py-2 text-sm font-medium rounded-md transition-all flex items-center gap-2 shrink-0", 
             activeTab === 'payment' ? (caseData.payment_committed ? "bg-green-600 text-white shadow-sm" : "bg-primary text-primary-foreground shadow-sm") : "text-muted-foreground hover:text-foreground")}
         >
           <DollarSign className="h-4 w-4" /> {caseData.payment_committed ? "Commitment Verified" : "Victory Commitment"}
@@ -167,82 +167,150 @@ export default function CaseDetailPage() {
            </div>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-           <Card className="bg-primary/5 border-primary/20 h-fit">
-              <CardHeader>
-                 <CardTitle className="flex items-center gap-2">
-                    <ShieldCheck className="h-5 w-5 text-primary" /> Success Fee Agreement
-                 </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                 <p className="text-sm leading-relaxed">
-                    By using the Probo Law Firm agent network, you agree to a **Victory Success Fee**. This fee is only payable **AFTER** your case is won using our strategic vectors.
-                 </p>
-                 <div className="p-4 bg-background border border-border rounded-xl space-y-3">
-                    <div className="flex justify-between items-center">
-                       <span className="text-xs font-bold uppercase text-muted-foreground">Service Fee</span>
-                       <span className="text-lg font-display font-bold">$90 USD</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                       <span className="text-xs font-bold uppercase text-muted-foreground">Payment Window</span>
-                       <span className="text-xs font-medium">Post-Victory (7 Days)</span>
-                    </div>
-                 </div>
-                 {!caseData.payment_committed ? (
-                    <div className="flex items-start gap-3 p-3 bg-primary/10 rounded-lg border border-primary/20">
-                        <button 
-                          onClick={handleCommit}
-                          disabled={committing}
-                          className="w-full bg-primary text-primary-foreground py-2 rounded-md font-bold text-xs flex items-center justify-center gap-2"
-                        >
-                           {committing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Zap className="h-3 w-3" />}
-                           COMMIT TO $90 SUCCESS FEE
-                        </button>
-                    </div>
-                 ) : (
-                    <div className="flex items-center justify-center gap-2 p-3 bg-green-500/10 text-green-600 rounded-lg border border-green-500/20 font-bold text-xs">
-                        <ShieldCheck className="h-4 w-4" /> COMMITMENT VERIFIED BY VORTEX
-                    </div>
-                 )}
-                 <p className="text-[10px] text-muted-foreground text-center">
-                    Note: Commitment is required to view payment instructions.
-                 </p>
-              </CardContent>
-           </Card>
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+             <Card className="bg-primary/5 border-primary/20 h-fit">
+                <CardHeader>
+                   <CardTitle className="flex items-center gap-2">
+                      <ShieldCheck className="h-5 w-5 text-primary" /> Success Fee Agreement
+                   </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                   <p className="text-sm leading-relaxed">
+                      By using the Probo Law Firm agent network, you agree to a **Victory Success Fee**. This fee is only payable **AFTER** your case is won using our strategic vectors.
+                   </p>
+                   <div className="p-4 bg-background border border-border rounded-xl space-y-3">
+                      <div className="flex justify-between items-center">
+                         <span className="text-xs font-bold uppercase text-muted-foreground">Service Fee</span>
+                         <span className="text-lg font-display font-bold">$90 USD</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                         <span className="text-xs font-bold uppercase text-muted-foreground">Recipient</span>
+                         <span className="text-xs font-medium">Stephen Wahogo (0720975622)</span>
+                      </div>
+                   </div>
+                   {!caseData.payment_committed ? (
+                      <div className="flex items-start gap-3 p-3 bg-primary/10 rounded-lg border border-primary/20">
+                          <button 
+                            onClick={handleCommit}
+                            disabled={committing}
+                            className="w-full bg-primary text-primary-foreground py-2 rounded-md font-bold text-xs flex items-center justify-center gap-2"
+                          >
+                             {committing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Zap className="h-3 w-3" />}
+                             COMMIT TO $90 SUCCESS FEE
+                          </button>
+                      </div>
+                   ) : (
+                      <div className="flex items-center justify-center gap-2 p-3 bg-green-500/10 text-green-600 rounded-lg border border-green-500/20 font-bold text-xs">
+                          <ShieldCheck className="h-4 w-4" /> COMMITMENT VERIFIED BY VORTEX
+                      </div>
+                   )}
+                </CardContent>
+             </Card>
 
-           <Card className={cn("transition-all h-fit", !caseData.payment_committed && "opacity-50 pointer-events-none")}>
-              <CardHeader>
-                 <CardTitle className="flex items-center gap-2">
-                    <Smartphone className="h-5 w-5 text-primary" /> Mobile Payment Instructions
-                 </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                 <div className="space-y-1">
-                    <p className="text-xs font-bold uppercase text-muted-foreground tracking-widest">Recipient Mobile Number</p>
-                    <p className="text-2xl font-mono font-bold text-foreground">0720975622</p>
-                    <p className="text-[10px] text-muted-foreground">Region: Kenya · Network: MPESA/Mobile Money</p>
-                 </div>
+             <Card className={cn("transition-all h-fit", !caseData.payment_committed && "opacity-50 pointer-events-none")}>
+                <CardHeader>
+                   <CardTitle className="flex items-center gap-2">
+                      <Smartphone className="h-5 w-5 text-primary" /> Recipient Details
+                   </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                   <div className="space-y-1">
+                      <p className="text-xs font-bold uppercase text-muted-foreground tracking-widest">Mobile Number</p>
+                      <p className="text-2xl font-mono font-bold text-foreground">0720975622</p>
+                      <p className="text-[10px] text-muted-foreground">Region: Kenya · Network: MPESA / Mobile Money</p>
+                   </div>
+                   <p className="text-xs text-muted-foreground italic">
+                      Use any global remittance app listed below to send exactly **$90 USD** to this number.
+                   </p>
+                </CardContent>
+             </Card>
+          </div>
 
-                 <div className="space-y-4">
-                    <div className="flex items-center gap-4">
-                       <div className="w-8 h-8 rounded-full bg-muted border border-border flex items-center justify-center text-xs font-bold">1</div>
-                       <p className="text-xs font-medium">Wait for the case victory or favorable settlement.</p>
-                    </div>
-                    <div className="flex items-center gap-4">
-                       <div className="w-8 h-8 rounded-full bg-muted border border-border flex items-center justify-center text-xs font-bold">2</div>
-                       <p className="text-xs font-medium">Transfer **$90** (or equivalent in KES) to the number above.</p>
-                    </div>
-                    <div className="flex items-center gap-4">
-                       <div className="w-8 h-8 rounded-full bg-muted border border-border flex items-center justify-center text-xs font-bold">3</div>
-                       <p className="text-xs font-medium">Send a confirmation message to the Neural Link with the transaction ID.</p>
-                    </div>
-                 </div>
+          <div className={cn("space-y-4", !caseData.payment_committed && "opacity-30 pointer-events-none grayscale")}>
+            <h2 className="text-xl font-display font-bold flex items-center gap-2">
+               <Globe className="h-5 w-5 text-primary" /> Global Payment Hub
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+               {/* 1. Cards */}
+               <Card className="p-4 border-border/40">
+                  <div className="flex items-center gap-3 mb-3">
+                     <CreditCard className="h-5 w-5 text-blue-500" />
+                     <p className="text-sm font-bold">Payment Cards</p>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground mb-4">Visa, Mastercard, Amex, Debit/Prepaid.</p>
+                  <div className="space-y-2">
+                     <p className="text-[10px] font-bold uppercase text-primary">Instructions:</p>
+                     <p className="text-[10px] leading-tight">Download **Remitly** or **WorldRemit**, add your card, and send to mobile number **0720975622**.</p>
+                  </div>
+               </Card>
 
-                 <div className="pt-4 border-t border-border">
-                    <p className="text-[10px] text-center italic text-muted-foreground">"Justice is a service. Integrity is our bond."</p>
-                 </div>
-              </CardContent>
-           </Card>
+               {/* 2. Wallets */}
+               <Card className="p-4 border-border/40">
+                  <div className="flex items-center gap-3 mb-3">
+                     <Wallet className="h-5 w-5 text-orange-500" />
+                     <p className="text-sm font-bold">Digital Wallets</p>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground mb-4">PayPal, Apple Pay, Google Pay.</p>
+                  <div className="space-y-2">
+                     <p className="text-[10px] font-bold uppercase text-primary">Instructions:</p>
+                     <p className="text-[10px] leading-tight">Use **Sendwave** or **Wise**. Link your wallet and transfer to mobile number **0720975622**.</p>
+                  </div>
+               </Card>
+
+               {/* 3. Banks */}
+               <Card className="p-4 border-border/40">
+                  <div className="flex items-center gap-3 mb-3">
+                     <Landmark className="h-5 w-5 text-green-600" />
+                     <p className="text-sm font-bold">Bank Transfer</p>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground mb-4">SWIFT, ACH, Real-Time Payments.</p>
+                  <div className="space-y-2">
+                     <p className="text-[10px] font-bold uppercase text-primary">Instructions:</p>
+                     <p className="text-[10px] leading-tight">Initiate transfer via **Wise** or **Remitly**. Choose "Mobile Money" as the payout method for **0720975622**.</p>
+                  </div>
+               </Card>
+
+               {/* 4. Alternative */}
+               <Card className="p-4 border-border/40">
+                  <div className="flex items-center gap-3 mb-3">
+                     <Zap className="h-5 w-5 text-yellow-500" />
+                     <p className="text-sm font-bold">Alternative (UPI/Pix)</p>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground mb-4">India UPI, Brazil Pix, SEPA.</p>
+                  <div className="space-y-2">
+                     <p className="text-[10px] font-bold uppercase text-primary">Instructions:</p>
+                     <p className="text-[10px] leading-tight">Use **Remitly Global** to bridge your local A2A payment to Kenya Mobile Money **0720975622**.</p>
+                  </div>
+               </Card>
+
+               {/* 5. Crypto */}
+               <Card className="p-4 border-border/40">
+                  <div className="flex items-center gap-3 mb-3">
+                     <Bitcoin className="h-5 w-5 text-yellow-600" />
+                     <p className="text-sm font-bold">Cryptocurrency</p>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground mb-4">BTC, ETH, Stablecoins (USDT/USDC).</p>
+                  <div className="space-y-2">
+                     <p className="text-[10px] font-bold uppercase text-primary">Instructions:</p>
+                     <p className="text-[10px] leading-tight">Use **Binance P2P** or **Yellow Card** to convert crypto to M-Pesa for recipient **0720975622**.</p>
+                  </div>
+               </Card>
+
+               {/* 6. Biometric/Agentic */}
+               <Card className="p-4 bg-primary/5 border-primary/20">
+                  <div className="flex items-center gap-3 mb-3">
+                     <Scale className="h-5 w-5 text-primary" />
+                     <p className="text-sm font-bold">Agentic Commerce</p>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground mb-4">AI-Managed Settlement.</p>
+                  <div className="space-y-2">
+                     <p className="text-[10px] font-bold uppercase text-primary">Coming Soon:</p>
+                     <p className="text-[10px] leading-tight">Autonomous VORTEX agents will handle automated escrow and biometric smile-to-pay triggers.</p>
+                  </div>
+               </Card>
+            </div>
+          </div>
         </div>
       )}
     </div>
