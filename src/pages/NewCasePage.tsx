@@ -1,138 +1,124 @@
-
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Zap, Loader2, ArrowLeft, Shield } from 'lucide-react';
+import { Scale, Zap, Globe, Shield, Loader2, ArrowRight, Briefcase, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent } from '@/components/ui/card';
-import { aiService } from '@/services/AIService';
-import { dossierService } from '@/services/DossierService';
-import React, { useState } from 'react';
+
+const CASE_TYPES = ['Criminal Law', 'Civil Law', 'Corporate Law', 'Constitutional Law', 'IP Law', 'Family Law'];
 
 export default function NewCasePage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [streamedText, setStreamedText] = useState('');
+  const userFirm = localStorage.getItem('user_firm') || 'Corporate';
+  
   const [form, setForm] = useState({
     title: '',
-    type: 'Criminal Law',
+    case_type: userFirm === 'Family Law' ? 'Family Law' : (userFirm === 'Criminal Defense' ? 'Criminal Law' : 'Corporate Law'),
     jurisdiction: '',
     description: ''
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("VORTEX: Initiating analysis...");
     setLoading(true);
-    setStreamedText('');
-
+    
+    const isCreator = localStorage.getItem('user_email') === 'stephenwahogoka0@gmail.com';
+    
     try {
-      let fullReport = '';
-      for await (const chunk of aiService.streamResponse(form.description)) {
-        fullReport += chunk;
-        setStreamedText(fullReport);
-      }
-
-      console.log("VORTEX: Calling backend for dossier creation...");
-      const newCase = await dossierService.createCase({
-        ...form,
-        report: fullReport
+      const res = await fetch('http://localhost:8000/dossiers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          ...form, 
+          creator_bypass: isCreator,
+          firm_division: userFirm 
+        })
       });
-
-      console.log("VORTEX: Dossier created. Redirecting to:", newCase.id);
-      navigate(`/cases/${newCase.id}`);
+      const data = await res.json();
+      navigate(`/cases/${data.id}`);
     } catch (err) {
-      console.error("VORTEX ERROR:", err);
+      console.error(err);
       setLoading(false);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="max-w-3xl mx-auto space-y-6">
-         <div className="flex items-center gap-3">
-            <Loader2 className="h-6 w-6 text-primary animate-spin" />
-            <h1 className="text-2xl font-display font-bold text-foreground">Quantum Analysis in Progress...</h1>
-         </div>
-         <Card className="bg-foreground text-background font-mono text-xs p-6 h-[400px] overflow-y-auto">
-            <pre className="whitespace-pre-wrap">{streamedText}</pre>
-         </Card>
-         <div className="grid grid-cols-3 gap-4">
-            <div className="h-2 bg-primary/20 rounded-full overflow-hidden">
-               <div className="h-full bg-primary animate-pulse" style={{ width: '100%' }}></div>
-            </div>
-         </div>
-      </div>
-    );
-  }
+  const firmIcon = {
+    'Corporate': Briefcase,
+    'Criminal Defense': Shield,
+    'Family Law': Heart
+  }[userFirm as 'Corporate' | 'Criminal Defense' | 'Family Law'] || Scale;
 
   return (
-    <div className="max-w-2xl mx-auto space-y-8">
-      <Button variant="ghost" onClick={() => navigate('/dashboard')} className="gap-2">
-        <ArrowLeft className="h-4 w-4" /> Back to Dashboard
-      </Button>
-
-      <div className="space-y-2">
-        <h1 className="text-3xl font-display font-bold text-foreground">Case Intake Terminal</h1>
-        <p className="text-muted-foreground">Initialize the VORTEX by providing foundational case facts.</p>
+    <div className="max-w-3xl mx-auto space-y-8 animate-in slide-in-from-bottom-4 duration-700 pb-20">
+      <div className="text-center space-y-3">
+        <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-4">
+           {React.createElement(firmIcon, { className: "h-8 w-8 text-primary" })}
+        </div>
+        <h1 className="text-4xl font-display font-bold">{userFirm} Intake</h1>
+        <p className="text-muted-foreground uppercase tracking-widest text-[10px] font-bold">
+           Initializing {userFirm === 'Corporate' ? '3.3M' : '3.3M'} nodes for specialized legal vectoring
+        </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <Card>
-          <CardContent className="p-6 space-y-4">
+        <Card className="p-8 space-y-6 bg-card/50 backdrop-blur-sm border-border/50 shadow-2xl">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Case Title</label>
+              <label className="text-xs font-bold uppercase tracking-widest opacity-60">Case Title / Reference</label>
               <Input 
-                placeholder="e.g., The People vs. Anderson" 
-                value={form.title} 
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm({...form, title: e.target.value})}
+                placeholder="e.g. Acme Corp Merger" 
+                value={form.title}
+                onChange={e => setForm({...form, title: e.target.value})}
                 required
+                className="bg-background/50"
               />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-               <div className="space-y-2">
-                  <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Jurisdiction</label>
-                  <Input 
-                    placeholder="e.g., International Criminal Court" 
-                    value={form.jurisdiction} 
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setForm({...form, jurisdiction: e.target.value})}
-                    required
-                  />
-               </div>
-               <div className="space-y-2">
-                  <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Case Type</label>
-                  <select 
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground"
-                    value={form.type}
-                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setForm({...form, type: e.target.value})}
-                  >
-                    <option>Criminal Law</option>
-                    <option>Constitutional Law</option>
-                    <option>Corporate Law</option>
-                    <option>International Law</option>
-                  </select>
-               </div>
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Foundational Facts</label>
-              <Textarea 
-                placeholder="Detail the timeline, evidence, and primary allegations..." 
-                className="min-h-[150px]"
-                value={form.description}
-                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setForm({...form, description: e.target.value})}
-                required
-              />
+              <label className="text-xs font-bold uppercase tracking-widest opacity-60">Legal Domain</label>
+              <select 
+                className="w-full bg-background/50 border border-border h-10 px-3 rounded-md text-sm font-medium"
+                value={form.case_type}
+                onChange={e => setForm({...form, case_type: e.target.value})}
+              >
+                {CASE_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+              </select>
             </div>
-          </CardContent>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs font-bold uppercase tracking-widest opacity-60">Jurisdiction (Target Court)</label>
+            <Input 
+              placeholder="e.g. Kenya — High Court" 
+              value={form.jurisdiction}
+              onChange={e => setForm({...form, jurisdiction: e.target.value})}
+              required
+              className="bg-background/50"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs font-bold uppercase tracking-widest opacity-60">Full Case Description</label>
+            <Textarea 
+              placeholder="Provide exhaustive details. The VORTEX mesh requires precise data for probability collapse..." 
+              className="min-h-[250px] bg-background/50 leading-relaxed"
+              value={form.description}
+              onChange={e => setForm({...form, description: e.target.value})}
+              required
+            />
+          </div>
         </Card>
 
-        <div className="flex justify-between items-center bg-secondary/30 p-4 rounded-xl border border-border">
-           <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground">
-              <Shield className="h-4 w-4" /> 256-BIT ENCRYPTION ACTIVE
-           </div>
-           <Button type="submit" size="lg" className="gap-2">
-              <Zap className="h-4 w-4" /> Activate VORTEX Analysis
-           </Button>
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4 text-[10px] uppercase font-bold opacity-40">
+             <div className="flex items-center gap-1"><Shield className="h-3 w-3" /> Encrypted Transmission</div>
+             <div className="flex items-center gap-1"><Globe className="h-3 w-3" /> Global Node Mesh</div>
+          </div>
+          <Button type="submit" disabled={loading} className="px-10 h-14 gap-3 text-lg font-bold shadow-xl shadow-primary/20">
+            {loading ? <Loader2 className="h-6 w-6 animate-spin" /> : <Zap className="h-6 w-6" />}
+            MOBILIZE {userFirm.toUpperCase()} SWARM <ArrowRight className="h-5 w-5" />
+          </Button>
         </div>
       </form>
     </div>

@@ -1,157 +1,108 @@
-
-import { Link, Outlet, useLocation } from 'react-router-dom';
-import { Scale, Plus, MessageSquare, LayoutDashboard, Zap, LogOut, Mail, Smartphone, Globe } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { useAuth } from '@/services/AuthService';
+import React, { useState } from 'react';
+import { Link, Outlet, useNavigate } from 'react-router-dom';
+import { Scale, LayoutDashboard, Plus, MessageSquare, Zap, Palette, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent } from '@/components/ui/card';
-import CookieBanner from '@/components/CookieBanner';
-import { useState } from 'react';
+import { useTheme } from '@/lib/ThemeContext';
 
-const navLinks = [
-  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { to: '/cases/new', label: 'New Case', icon: Plus },
-  { to: '/consult', label: 'Neural Link', icon: MessageSquare },
-];
+const Layout: React.FC = () => {
+  const { theme, setTheme } = useTheme();
+  const navigate = useNavigate();
+  const [showSecretInput, setShowSecretInput] = useState(false);
+  const [secret, setSecret] = useState('');
 
-export default function Layout() {
-  const location = useLocation();
-  const { user, loginWithGoogle, loginWithMagicLink, loginWithPhone, logout, isLoading } = useAuth();
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [authMode, setAuthMode] = useState<'options' | 'email' | 'phone'>('options');
-
-  if (isLoading) return <div className="min-h-screen flex items-center justify-center bg-background text-foreground font-display font-bold">VORTEX INITIALIZING...</div>;
-
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
-        <div className="max-w-md w-full space-y-8 text-center">
-          <div className="flex justify-center">
-             <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20">
-                <Scale className="h-8 w-8 text-primary" />
-             </div>
-          </div>
-          <div>
-            <h1 className="text-4xl font-display font-bold tracking-tighter text-foreground">PROBO LAW FIRM</h1>
-            <p className="text-muted-foreground mt-2 uppercase text-[10px] font-bold tracking-[0.2em]">The Singularity of Law</p>
-          </div>
-
-          <Card className="border-border/60 shadow-xl overflow-hidden">
-            <CardContent className="p-0">
-               {authMode === 'options' && (
-                  <div className="p-6 space-y-3">
-                     <p className="text-sm font-medium mb-6 text-foreground">Choose your neural entry point</p>
-                     <Button onClick={() => loginWithGoogle()} variant="outline" className="w-full gap-3 h-12 shadow-sm">
-                        <Globe className="h-4 w-4 text-blue-500" /> Continue with Google
-                     </Button>
-                     <Button onClick={() => setAuthMode('email')} variant="outline" className="w-full gap-3 h-12 shadow-sm">
-                        <Mail className="h-4 w-4 text-primary" /> Continue with Email
-                     </Button>
-                     <Button onClick={() => setAuthMode('phone')} variant="outline" className="w-full gap-3 h-12 shadow-sm">
-                        <Smartphone className="h-4 w-4 text-primary" /> Continue with Phone
-                     </Button>
-                  </div>
-               )}
-
-               {authMode === 'email' && (
-                  <div className="p-6 space-y-4">
-                     <p className="text-sm font-medium text-foreground">Initialize Magic Link</p>
-                     <Input 
-                        placeholder="Enter legal email..." 
-                        type="email" 
-                        value={email} 
-                        onChange={e => setEmail(e.target.value)} 
-                        className="h-12"
-                     />
-                     <Button onClick={() => loginWithMagicLink(email)} className="w-full h-12">Send Link</Button>
-                     <button onClick={() => setAuthMode('options')} className="text-[10px] font-bold uppercase text-muted-foreground hover:text-primary">Back to options</button>
-                  </div>
-               )}
-
-               {authMode === 'phone' && (
-                  <div className="p-6 space-y-4">
-                     <p className="text-sm font-medium text-foreground">Neural OTP Synchronization</p>
-                     <Input 
-                        placeholder="+254..." 
-                        type="tel" 
-                        value={phone} 
-                        onChange={e => setPhone(e.target.value)} 
-                        className="h-12"
-                     />
-                     <Button onClick={() => loginWithPhone(phone)} className="w-full h-12">Send OTP</Button>
-                     <button onClick={() => setAuthMode('options')} className="text-[10px] font-bold uppercase text-muted-foreground hover:text-primary">Back to options</button>
-                  </div>
-               )}
-            </CardContent>
-          </Card>
-          
-          <div className="pt-4 space-y-4">
-             <p className="text-[10px] text-muted-foreground">Admin access code required for high-tier protocols.</p>
-             <div className="flex justify-center opacity-30 grayscale hover:opacity-100 hover:grayscale-0 transition-all cursor-help">
-                <div className="p-2 bg-white rounded-lg border border-black shadow-inner">
-                   <div className="w-20 h-20 bg-[url('https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://probo.law')] bg-cover"></div>
-                </div>
-             </div>
-             <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Scan to install on iOS/Android</p>
-          </div>
-        </div>
-        <CookieBanner />
-      </div>
-    );
-  }
+  const handleSecretSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (secret === '5795') {
+      localStorage.setItem('creator_access', 'true');
+      navigate('/hangar');
+      setShowSecretInput(false);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-background">
-      <nav className="border-b border-border bg-card/50 backdrop-blur-md sticky top-0 z-50">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
-            <Link to="/dashboard" className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-primary/10 border border-primary/40 flex items-center justify-center">
-                <Scale className="h-5 w-5 text-primary" />
-              </div>
-              <div className="hidden md:block">
-                <div className="font-display font-bold text-sm tracking-widest uppercase text-foreground">Probo Law Firm</div>
-                <div className="flex items-center gap-1 text-[10px] text-primary font-bold">
-                   <Zap className="h-2 w-2" /> QUANTUM PROTOCOLS ONLINE
-                </div>
-              </div>
-            </Link>
-
-            <div className="flex items-center gap-1">
-              {navLinks.map(({ to, label, icon: Icon }) => (
-                <Link
-                  key={to}
-                  to={to}
-                  className={cn(
-                    'flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all',
-                    location.pathname === to ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-                  )}
-                >
-                  <Icon className="h-4 w-4" />
-                  <span className="hidden sm:inline">{label}</span>
-                </Link>
-              ))}
+    <div className="min-h-screen flex flex-col bg-background text-foreground transition-colors duration-300">
+      <header className="border-b border-border/50 backdrop-blur-md sticky top-0 z-50 bg-background/80">
+        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2 group">
+            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center border border-primary/30 group-hover:bg-primary/20 transition-all">
+              <Scale className="h-6 w-6 text-primary" />
             </div>
+            <div>
+              <h1 className="font-display font-bold text-lg tracking-tighter leading-none">PROBO</h1>
+              <p className="text-[10px] text-primary/70 uppercase tracking-widest font-sans">Law Firm</p>
+            </div>
+          </Link>
 
-            <div className="flex items-center gap-4">
-               <div className="hidden lg:flex items-center gap-2 text-[10px] font-bold text-muted-foreground bg-muted px-3 py-1 rounded-full border border-border">
-                  <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                  AGENTS: 10,000,000
-               </div>
-               <Button variant="outline" size="sm" onClick={() => logout()} className="h-8 gap-2">
-                  <LogOut className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">Logout</span>
-               </Button>
+          <nav className="hidden md:flex items-center gap-6">
+            <Link to="/dashboard" className="text-sm font-medium hover:text-primary flex items-center gap-2">
+              <LayoutDashboard className="h-4 w-4" /> Dashboard
+            </Link>
+            <Link to="/cases/new" className="text-sm font-medium hover:text-primary flex items-center gap-2">
+              <Plus className="h-4 w-4" /> New Case
+            </Link>
+            <Link to="/consult" className="text-sm font-medium hover:text-primary flex items-center gap-2">
+              <MessageSquare className="h-4 w-4" /> Consult AI
+            </Link>
+          </nav>
+
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setTheme(theme === 'botanical' ? 'navy' : 'botanical')}
+              title="Switch Theme"
+            >
+              <Palette className="h-5 w-5" />
+            </Button>
+            
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowSecretInput(!showSecretInput)}
+            >
+              <Lock className="h-4 w-4 opacity-30" />
+            </Button>
+
+            {showSecretInput && (
+              <form onSubmit={handleSecretSubmit} className="absolute top-16 right-4 bg-card p-2 border border-border rounded shadow-xl animate-in fade-in slide-in-from-top-2">
+                <input
+                  type="password"
+                  placeholder="Secret Code"
+                  className="bg-background border border-border px-2 py-1 text-sm rounded focus:outline-none focus:ring-1 focus:ring-primary w-24"
+                  value={secret}
+                  onChange={(e) => setSecret(e.target.value)}
+                  autoFocus
+                />
+              </form>
+            )}
+
+            <div className="flex flex-col items-end">
+              <div className="flex items-center gap-1.5 text-[10px] font-bold text-green-500 bg-green-500/10 px-2 py-0.5 rounded-full uppercase">
+                <Zap className="h-2.5 w-2.5 animate-pulse" /> Vortex Active
+              </div>
             </div>
           </div>
         </div>
-      </nav>
-      <main className="container mx-auto px-4 py-8">
+      </header>
+
+      <main className="flex-grow container mx-auto px-4 py-8">
         <Outlet />
       </main>
-      <CookieBanner />
+
+      <footer className="border-t border-border/50 py-8 bg-muted/30">
+        <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-xs text-muted-foreground italic">
+            "Every impossible case has a quantum path to victory."
+          </p>
+          <div className="flex items-center gap-6 text-[10px] uppercase tracking-widest font-bold opacity-40">
+            <span>9,999,999 Agents</span>
+            <span>195 Jurisdictions</span>
+            <span>Quantum V1.2</span>
+          </div>
+        </div>
+      </footer>
     </div>
   );
-}
+};
+
+export default Layout;

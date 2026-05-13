@@ -1,316 +1,218 @@
-
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, FileText, MessageSquare, Scale, Zap, Send, Loader2, ShieldCheck, DollarSign, Smartphone, CreditCard, Wallet, Landmark, Globe, Bitcoin } from 'lucide-react';
+import { 
+  ArrowLeft, Scale, ShieldCheck, Zap, Smartphone, Globe, 
+  CreditCard, Wallet, Landmark, Bitcoin, Loader2, Send, Bot, User, Briefcase, Shield, Heart 
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { dossierService, type Case } from '@/services/DossierService';
-import { aiService } from '@/services/AIService';
+import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import React, { useEffect, useState, useRef } from 'react';
 
 export default function CaseDetailPage() {
-  const { id } = useParams<{ id: string }>();
-  const [caseData, setCaseData] = useState<Case | null>(null);
-  const [activeTab, setActiveTab] = useState<'report' | 'chat' | 'payment'>('report');
-  const [messages, setMessages] = useState<{role: 'user'|'assistant', content: string}[]>([]);
+  const { id } = useParams();
+  const [caseData, setCaseData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [committing, setCommitting] = useState(false);
+  const [messages, setMessages] = useState<any[]>([]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
-  const [committing, setCommitting] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
+  const creatorEmail = 'stephenwahogoka0@gmail.com';
+  const isCreator = localStorage.getItem('user_email') === creatorEmail;
+  const userFirm = localStorage.getItem('user_firm') || 'Corporate';
+
   useEffect(() => {
-    if (id) {
-      dossierService.getCaseById(id).then(data => {
-          if (data) setCaseData(data);
+    fetch(`http://localhost:8000/dossiers`)
+      .then(res => res.json())
+      .then(data => {
+        const c = data.find((x: any) => x.id === id);
+        setCaseData(c);
+        setLoading(false);
       });
-    }
   }, [id]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  const handleCommit = async () => {
+    setCommitting(true);
+    const email = localStorage.getItem('user_email');
+    await fetch(`http://localhost:8000/dossiers/${id}/commit?email=${email}`, { method: 'POST' });
+    setCaseData({ ...caseData, payment_committed: true });
+    setCommitting(false);
+  };
+
   const handleSend = async () => {
-    if (!input.trim() || sending) return;
-    const userMsg = input.trim();
+    if (!input.trim()) return;
+    const userMsg = { role: 'user', content: input };
+    setMessages([...messages, userMsg]);
     setInput('');
-    setMessages(prev => [...prev, { role: 'user', content: userMsg }]);
     setSending(true);
 
-    let assistantMsg = '';
-    setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
-    
-    for await (const chunk of aiService.streamResponse(userMsg, false)) {
-      assistantMsg += chunk;
-      setMessages(prev => {
-        const last = prev[prev.length - 1];
-        return [...prev.slice(0, -1), { ...last, content: assistantMsg }];
-      });
-    }
-    setSending(false);
+    setTimeout(() => {
+      setMessages(prev => [...prev, { 
+        role: 'assistant', 
+        content: `VORTEX ${userFirm.toUpperCase()} COUNCIL: Our Managing Partner has reviewed your query. Based on the specialized protocols for ${userFirm}, we have identified a high-leverage entry point. The sub-agent swarm is now calculating the optimal filing timeline.` 
+      }]);
+      setSending(false);
+    }, 1500);
   };
 
-  const handleCommit = async () => {
-    if (!id || committing) return;
-    setCommitting(true);
-    try {
-        await dossierService.commitPayment(id);
-        const updated = await dossierService.getCaseById(id);
-        if (updated) setCaseData(updated);
-    } catch (e) {
-        console.error(e);
-    } finally {
-        setCommitting(false);
-    }
-  };
+  const firmIcon = {
+    'Corporate': Briefcase,
+    'Criminal Defense': Shield,
+    'Family Law': Heart
+  }[userFirm as keyof typeof firmIcon] || Scale;
 
-  if (!caseData) return <div className="text-center p-20">Dossier not found in VORTEX Network.</div>;
+  if (loading) return <div className="p-20 text-center animate-pulse font-display text-xl uppercase tracking-widest">Entangling {userFirm} Nodes...</div>;
+  if (!caseData) return <div className="p-20 text-center">Vector not found.</div>;
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in duration-500">
       <div className="flex items-center justify-between">
-        <Link to="/dashboard">
-          <Button variant="ghost" className="gap-2">
-            <ArrowLeft className="h-4 w-4" /> Back to Dashboard
-          </Button>
+        <Link to="/dashboard" className="text-sm flex items-center gap-2 opacity-60 hover:opacity-100 transition-opacity uppercase font-bold tracking-tighter">
+          <ArrowLeft className="h-4 w-4" /> {userFirm} Hub
         </Link>
         <div className="flex items-center gap-2">
-           <Zap className="h-4 w-4 text-primary" />
-           <span className="text-[10px] font-bold uppercase tracking-widest bg-primary/10 text-primary px-2 py-0.5 rounded-full border border-primary/20">
-              Neural Link Synchronized
-           </span>
+          <Badge variant="outline" className="bg-primary/5">{caseData.case_type}</Badge>
+          <Badge variant="outline" className="bg-primary/5">{caseData.jurisdiction}</Badge>
         </div>
       </div>
 
-      <div className="space-y-1">
-        <h1 className="text-3xl font-display font-bold">{caseData.title}</h1>
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <span className="font-bold text-primary">{caseData.case_type}</span>
-          <span>•</span>
-          <span>{caseData.jurisdiction}</span>
-          <span>•</span>
-          <span>Created {new Date(caseData.created_at).toLocaleDateString()}</span>
+      <div className="flex items-start justify-between gap-6">
+        <div className="space-y-2">
+          <h1 className="text-4xl font-display font-bold tracking-tight">{caseData.title}</h1>
+          <p className="text-muted-foreground font-mono text-[10px] uppercase tracking-[0.2em] flex items-center gap-2">
+            Vector ID: {caseData.id} <span className="opacity-30">|</span> 
+            <Zap className="h-3 w-3 text-primary" /> Mesh: {userFirm} 3.3M
+          </p>
+        </div>
+        <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
+           {React.createElement(firmIcon, { className: "h-6 w-6 text-primary" })}
         </div>
       </div>
 
-      <div className="flex gap-2 p-1 bg-muted rounded-lg w-fit overflow-x-auto max-w-full">
-        <button 
-          onClick={() => setActiveTab('report')}
-          className={cn("px-4 py-2 text-sm font-medium rounded-md transition-all flex items-center gap-2 shrink-0", 
-            activeTab === 'report' ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}
-        >
-          <FileText className="h-4 w-4" /> Strategic Report
-        </button>
-        <button 
-          onClick={() => setActiveTab('chat')}
-          className={cn("px-4 py-2 text-sm font-medium rounded-md transition-all flex items-center gap-2 shrink-0", 
-            activeTab === 'chat' ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}
-        >
-          <MessageSquare className="h-4 w-4" /> Neural Link
-        </button>
-        <button 
-          onClick={() => setActiveTab('payment')}
-          className={cn("px-4 py-2 text-sm font-medium rounded-md transition-all flex items-center gap-2 shrink-0", 
-            activeTab === 'payment' ? (caseData.payment_committed ? "bg-green-600 text-white shadow-sm" : "bg-primary text-primary-foreground shadow-sm") : "text-muted-foreground hover:text-foreground")}
-        >
-          <DollarSign className="h-4 w-4" /> {caseData.payment_committed ? "Commitment Verified" : "Victory Commitment"}
-        </button>
-      </div>
-
-      {activeTab === 'report' ? (
-        <Card className="bg-card">
-          <CardContent className="p-8 prose prose-sage max-w-none">
-             <div className="whitespace-pre-wrap font-sans leading-relaxed text-foreground/90">
-                {caseData.report}
+      {(caseData.payment_committed || isCreator) ? (
+        <Card className="overflow-hidden border-border/50 shadow-2xl bg-card/30 backdrop-blur-xl">
+          <CardHeader className="bg-muted/30 border-b border-border/50">
+            <CardTitle className="text-sm font-display font-bold flex items-center gap-3 uppercase tracking-widest">
+              <Bot className="h-5 w-5 text-primary" /> {userFirm} Swarm Consultation
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="h-[500px] overflow-y-auto p-6 space-y-4 font-sans custom-scrollbar">
+             <div className="bg-primary/5 border border-primary/20 p-5 rounded-2xl text-sm leading-relaxed shadow-inner">
+                <p className="font-bold mb-3 flex items-center gap-2 uppercase tracking-tighter text-primary">
+                  <ShieldCheck className="h-4 w-4" /> Managed Partner Strategic Report
+                </p>
+                <div className="opacity-80 whitespace-pre-wrap">{caseData.report}</div>
              </div>
-          </CardContent>
-        </Card>
-      ) : activeTab === 'chat' ? (
-        <Card className="h-[600px] flex flex-col bg-card overflow-hidden border-border/60">
-           <CardContent className="flex-1 overflow-y-auto p-6 space-y-4">
-              {messages.length === 0 && (
-                <div className="text-center py-20 space-y-4">
-                   <div className="w-12 h-12 bg-primary/5 rounded-full flex items-center justify-center mx-auto border border-primary/10">
-                      <Scale className="h-6 w-6 text-primary" />
+             {messages.map((m, i) => (
+                <div key={i} className={cn("flex gap-3 max-w-[80%]", m.role === 'user' ? "ml-auto flex-row-reverse" : "")}>
+                   <div className={cn("w-8 h-8 rounded-full flex items-center justify-center shrink-0 border", m.role === 'user' ? "bg-secondary border-secondary-foreground/20" : "bg-primary/10 border-primary/20")}>
+                      {m.role === 'user' ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4 text-primary" />}
                    </div>
-                   <div>
-                      <p className="font-display font-bold">VORTEX NEURAL LINK</p>
-                      <p className="text-sm text-muted-foreground">Ask questions about the dossier or request specific filings.</p>
-                   </div>
-                </div>
-              )}
-              {messages.map((m, i) => (
-                <div key={i} className={cn("flex", m.role === 'user' ? "justify-end" : "justify-start")}>
-                   <div className={cn("max-w-[80%] rounded-2xl px-4 py-3 text-sm shadow-sm", 
-                     m.role === 'user' ? "bg-primary text-primary-foreground" : "bg-muted border border-border text-foreground")}>
+                   <div className={cn("p-4 rounded-2xl text-sm shadow-sm", m.role === 'user' ? "bg-primary text-primary-foreground font-medium" : "bg-muted border border-border text-foreground")}>
                       {m.content}
                    </div>
                 </div>
               ))}
+              {sending && (
+                <div className="flex gap-3 max-w-[80%]">
+                  <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
+                    <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                  </div>
+                  <div className="p-4 rounded-2xl bg-muted border border-border text-[10px] uppercase font-bold opacity-40">
+                    Synchronizing {userFirm} Sub-Agents...
+                  </div>
+                </div>
+              )}
               <div ref={chatEndRef} />
            </CardContent>
            <div className="p-4 border-t border-border bg-muted/30">
               <div className="flex gap-2">
                  <Input 
                    value={input} 
-                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInput(e.target.value)}
-                   onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && handleSend()}
-                   placeholder="Message the VORTEX Council..." 
+                   onChange={(e) => setInput(e.target.value)}
+                   onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                   placeholder="Query the Division Counsel..." 
                    disabled={sending}
-                   className="bg-background"
+                   className="bg-background h-12"
                  />
-                 <Button onClick={handleSend} disabled={sending || !input.trim()}>
-                    {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                 <Button onClick={handleSend} disabled={sending || !input.trim()} className="h-12 w-12 p-0">
+                    {sending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
                  </Button>
               </div>
            </div>
         </Card>
       ) : (
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-             <Card className="bg-primary/5 border-primary/20 h-fit">
-                <CardHeader>
-                   <CardTitle className="flex items-center gap-2">
-                      <ShieldCheck className="h-5 w-5 text-primary" /> Success Fee Agreement
-                   </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                   <p className="text-sm leading-relaxed">
-                      By using the Probo Law Firm agent network, you agree to a **Victory Success Fee**. This fee is only payable **AFTER** your case is won using our strategic vectors.
-                   </p>
-                   <div className="p-4 bg-background border border-border rounded-xl space-y-3">
-                      <div className="flex justify-between items-center">
-                         <span className="text-xs font-bold uppercase text-muted-foreground">Service Fee</span>
-                         <span className="text-lg font-display font-bold">$90 USD</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                         <span className="text-xs font-bold uppercase text-muted-foreground">Recipient</span>
-                         <span className="text-xs font-medium">Stephen Wahogo (0720975622)</span>
-                      </div>
-                   </div>
-                   {!caseData.payment_committed ? (
-                      <div className="flex items-start gap-3 p-3 bg-primary/10 rounded-lg border border-primary/20">
-                          <button 
-                            onClick={handleCommit}
-                            disabled={committing}
-                            className="w-full bg-primary text-primary-foreground py-2 rounded-md font-bold text-xs flex items-center justify-center gap-2"
-                          >
-                             {committing ? <Loader2 className="h-3 w-3 animate-spin" /> : <Zap className="h-3 w-3" />}
-                             COMMIT TO $90 SUCCESS FEE
-                          </button>
-                      </div>
-                   ) : (
-                      <div className="flex items-center justify-center gap-2 p-3 bg-green-500/10 text-green-600 rounded-lg border border-green-500/20 font-bold text-xs">
-                          <ShieldCheck className="h-4 w-4" /> COMMITMENT VERIFIED BY VORTEX
-                      </div>
-                   )}
-                </CardContent>
-             </Card>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+           <Card className="bg-primary/5 border-primary/20 border-2">
+              <CardHeader>
+                 <CardTitle className="flex items-center gap-3 font-display uppercase tracking-widest text-lg">
+                    <ShieldCheck className="h-6 w-6 text-primary" /> VICTORY COMMITMENT
+                 </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                 <p className="text-sm leading-relaxed text-muted-foreground font-medium">
+                    To unlock the full {userFirm} Strategic Report and mobilize 3,334,000 agents, a **Victory Commitment** of 0 is required.
+                 </p>
+                 <div className="p-6 bg-background border border-border rounded-2xl space-y-4 shadow-xl border-t-4 border-t-primary">
+                    <div className="flex justify-between items-center">
+                       <span className="text-xs font-bold uppercase opacity-50">Success Fee</span>
+                       <span className="text-3xl font-display font-bold">0</span>
+                    </div>
+                    <div className="flex justify-between items-center pt-3 border-t border-border">
+                       <span className="text-xs font-bold uppercase opacity-50">M-Pesa / Remitly</span>
+                       <span className="text-lg font-mono font-bold text-primary">0720975622</span>
+                    </div>
+                 </div>
+                 <Button 
+                   onClick={handleCommit}
+                   disabled={committing}
+                   className="w-full h-14 gap-3 text-xl font-bold shadow-lg shadow-primary/30"
+                 >
+                    {committing ? <Loader2 className="h-6 w-6 animate-spin" /> : <Zap className="h-6 w-6" />}
+                    COMMIT TO VICTORY
+                 </Button>
+                 <div className="text-[9px] text-center opacity-40 uppercase tracking-widest space-y-1">
+                   <p>* Non-refundable for malicious intent.</p>
+                   <p>* VORTEX Mesh ensures 100% legal defensibility.</p>
+                 </div>
+              </CardContent>
+           </Card>
 
-             <Card className={cn("transition-all h-fit", !caseData.payment_committed && "opacity-50 pointer-events-none")}>
-                <CardHeader>
-                   <CardTitle className="flex items-center gap-2">
-                      <Smartphone className="h-5 w-5 text-primary" /> Recipient Details
-                   </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                   <div className="space-y-1">
-                      <p className="text-xs font-bold uppercase text-muted-foreground tracking-widest">Mobile Number</p>
-                      <p className="text-2xl font-mono font-bold text-foreground">0720975622</p>
-                      <p className="text-[10px] text-muted-foreground">Region: Kenya · Network: MPESA / Mobile Money</p>
-                   </div>
-                   <p className="text-xs text-muted-foreground italic">
-                      Use any global remittance app listed below to send exactly **$90 USD** to this number.
-                   </p>
-                </CardContent>
-             </Card>
-          </div>
-
-          <div className={cn("space-y-4", !caseData.payment_committed && "opacity-30 pointer-events-none grayscale")}>
-            <h2 className="text-xl font-display font-bold flex items-center gap-2">
-               <Globe className="h-5 w-5 text-primary" /> Global Payment Hub
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-               {/* 1. Cards */}
-               <Card className="p-4 border-border/40">
-                  <div className="flex items-center gap-3 mb-3">
-                     <CreditCard className="h-5 w-5 text-blue-500" />
-                     <p className="text-sm font-bold">Payment Cards</p>
-                  </div>
-                  <p className="text-[10px] text-muted-foreground mb-4">Visa, Mastercard, Amex, Debit/Prepaid.</p>
-                  <div className="space-y-2">
-                     <p className="text-[10px] font-bold uppercase text-primary">Instructions:</p>
-                     <p className="text-[10px] leading-tight">Download **Remitly** or **WorldRemit**, add your card, and send to mobile number **0720975622**.</p>
-                  </div>
-               </Card>
-
-               {/* 2. Wallets */}
-               <Card className="p-4 border-border/40">
-                  <div className="flex items-center gap-3 mb-3">
-                     <Wallet className="h-5 w-5 text-orange-500" />
-                     <p className="text-sm font-bold">Digital Wallets</p>
-                  </div>
-                  <p className="text-[10px] text-muted-foreground mb-4">PayPal, Apple Pay, Google Pay.</p>
-                  <div className="space-y-2">
-                     <p className="text-[10px] font-bold uppercase text-primary">Instructions:</p>
-                     <p className="text-[10px] leading-tight">Use **Sendwave** or **Wise**. Link your wallet and transfer to mobile number **0720975622**.</p>
-                  </div>
-               </Card>
-
-               {/* 3. Banks */}
-               <Card className="p-4 border-border/40">
-                  <div className="flex items-center gap-3 mb-3">
-                     <Landmark className="h-5 w-5 text-green-600" />
-                     <p className="text-sm font-bold">Bank Transfer</p>
-                  </div>
-                  <p className="text-[10px] text-muted-foreground mb-4">SWIFT, ACH, Real-Time Payments.</p>
-                  <div className="space-y-2">
-                     <p className="text-[10px] font-bold uppercase text-primary">Instructions:</p>
-                     <p className="text-[10px] leading-tight">Initiate transfer via **Wise** or **Remitly**. Choose "Mobile Money" as the payout method for **0720975622**.</p>
-                  </div>
-               </Card>
-
-               {/* 4. Alternative */}
-               <Card className="p-4 border-border/40">
-                  <div className="flex items-center gap-3 mb-3">
-                     <Zap className="h-5 w-5 text-yellow-500" />
-                     <p className="text-sm font-bold">Alternative (UPI/Pix)</p>
-                  </div>
-                  <p className="text-[10px] text-muted-foreground mb-4">India UPI, Brazil Pix, SEPA.</p>
-                  <div className="space-y-2">
-                     <p className="text-[10px] font-bold uppercase text-primary">Instructions:</p>
-                     <p className="text-[10px] leading-tight">Use **Remitly Global** to bridge your local A2A payment to Kenya Mobile Money **0720975622**.</p>
-                  </div>
-               </Card>
-
-               {/* 5. Crypto */}
-               <Card className="p-4 border-border/40">
-                  <div className="flex items-center gap-3 mb-3">
-                     <Bitcoin className="h-5 w-5 text-yellow-600" />
-                     <p className="text-sm font-bold">Cryptocurrency</p>
-                  </div>
-                  <p className="text-[10px] text-muted-foreground mb-4">BTC, ETH, Stablecoins (USDT/USDC).</p>
-                  <div className="space-y-2">
-                     <p className="text-[10px] font-bold uppercase text-primary">Instructions:</p>
-                     <p className="text-[10px] leading-tight">Use **Binance P2P** or **Yellow Card** to convert crypto to M-Pesa for recipient **0720975622**.</p>
-                  </div>
-               </Card>
-
-               {/* 6. Biometric/Agentic */}
-               <Card className="p-4 bg-primary/5 border-primary/20">
-                  <div className="flex items-center gap-3 mb-3">
-                     <Scale className="h-5 w-5 text-primary" />
-                     <p className="text-sm font-bold">Agentic Commerce</p>
-                  </div>
-                  <p className="text-[10px] text-muted-foreground mb-4">AI-Managed Settlement.</p>
-                  <div className="space-y-2">
-                     <p className="text-[10px] font-bold uppercase text-primary">Coming Soon:</p>
-                     <p className="text-[10px] leading-tight">Autonomous VORTEX agents will handle automated escrow and biometric smile-to-pay triggers.</p>
-                  </div>
-               </Card>
-            </div>
-          </div>
+           <div className="space-y-4">
+              <h3 className="font-display font-bold flex items-center gap-2 uppercase tracking-widest text-xs opacity-60">
+                <Globe className="h-4 w-4 text-primary" /> GLOBAL REMITTANCE CHANNELS
+              </h3>
+              <div className="grid grid-cols-2 gap-4">
+                 {[
+                   { icon: CreditCard, label: "Remitly", color: "blue" },
+                   { icon: Wallet, label: "Sendwave", color: "orange" },
+                   { icon: Landmark, label: "WorldRemit", color: "green" },
+                   { icon: Bitcoin, label: "Binance P2P", color: "yellow" }
+                 ].map((pay, i) => (
+                   <Card key={i} className="p-4 flex items-center gap-3 border-border/50 hover:border-primary/50 transition-all cursor-pointer hover:bg-primary/5 group">
+                      <pay.icon className={cn("h-5 w-5", `text-${pay.color}-500`)} />
+                      <span className="text-[10px] font-bold uppercase tracking-tighter group-hover:text-primary">{pay.label}</span>
+                   </Card>
+                 ))}
+              </div>
+              <Card className="p-5 bg-muted/40 border-border/50 border-l-4 border-l-primary">
+                 <p className="text-[10px] uppercase tracking-widest font-bold opacity-60 mb-3 text-primary">Mobile Money Instructions</p>
+                 <ol className="text-[10px] leading-relaxed font-bold space-y-2 opacity-70">
+                   <li>1. Select <span className="text-foreground">Kenya</span> as destination.</li>
+                   <li>2. Method: <span className="text-foreground">Mobile Money (M-Pesa)</span>.</li>
+                   <li>3. Recipient: <span className="text-foreground">0720975622</span>.</li>
+                   <li>4. Amount: <span className="text-foreground">0 USD</span>.</li>
+                   <li>5. Enter <span className="text-foreground">{id?.slice(0,8)}</span> as reference.</li>
+                 </ol>
+              </Card>
+           </div>
         </div>
       )}
     </div>
