@@ -1,11 +1,10 @@
-
 @import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Cinzel:wght@400;600;700;900&display=swap");
 
 @import "tailwindcss";
 
 @layer base {
-  :root {
-    /* PROBO LAW FIRM — ECO-NATURAL PALETTE */
+  :root, [data-theme='botanical'] {
+    /* PROBO LAW FIRM — ECO-NATURAL PALETTE (Botanical) */
     --background: 40 30% 98%; /* Cream */
     --foreground: 120 15% 15%; /* Deep Moss */
     
@@ -40,10 +39,27 @@
     --font-display: 'Cinzel', serif;
   }
 
-  .dark {
-    --background: 120 15% 10%;
-    --foreground: 40 20% 90%;
-    /* Add dark mode variations if needed, but we focus on the natural look */
+  [data-theme='navy'] {
+    /* PROBO LAW FIRM — DARK NAVY + GOLD THEME */
+    --background: 224 40% 7%;
+    --foreground: 45 25% 93%;
+    --muted: 224 32% 14%;
+    --muted-foreground: 220 15% 52%;
+    --popover: 224 35% 10%;
+    --popover-foreground: 45 25% 93%;
+    --border: 224 25% 18%;
+    --input: 224 25% 18%;
+    --card: 224 35% 10%;
+    --card-foreground: 45 25% 93%;
+    --primary: 43 85% 53%; /* Gold */
+    --primary-foreground: 224 40% 7%;
+    --secondary: 224 30% 15%;
+    --secondary-foreground: 45 25% 85%;
+    --accent: 38 70% 45%;
+    --accent-foreground: 224 40% 7%;
+    --destructive: 0 75% 55%;
+    --destructive-foreground: 0 0% 98%;
+    --ring: 43 85% 53%;
   }
 }
 
@@ -77,7 +93,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    @apply bg-background text-foreground font-sans antialiased transition-colors duration-300;
   }
   h1, h2, h3, h4, h5, h6 {
     @apply font-display;

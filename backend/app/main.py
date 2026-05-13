@@ -1,4 +1,3 @@
-
 from fastapi import FastAPI, Depends, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from .database import supabase, init_db
@@ -7,15 +6,16 @@ from .llm import llm_service
 from .quantum import quantum_engine
 import uuid
 import datetime
+from pydantic import BaseModel
+from typing import Optional
 
 init_db()
-# We run populate_initial_agents. Note: This might take a few seconds on first run.
 try:
     agent_manager.populate_initial_agents()
 except Exception as e:
     print(f"Agent Pop Error: {e}")
 
-app = FastAPI(title="Probo Law Firm - VORTEX API (Supabase Edition)")
+app = FastAPI(title="Probo Law Firm - VORTEX API")
 
 app.add_middleware(
     CORSMiddleware,
@@ -25,41 +25,49 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+class CaseCreate(BaseModel):
+    title: str
+    case_type: str
+    jurisdiction: str
+    description: str
+    creator_bypass: Optional[bool] = False
+    firm_division: Optional[str] = "Corporate"
+
 @app.get("/")
 def read_root():
     return {"status": "VORTEX ONLINE", "database": "Supabase Cloud"}
 
-@app.post("/unlock")
-def unlock_vortex(code: str):
-    success = llm_service.unlock(code)
-    if success:
-        return {"status": "Quantum Overdrive Activated", "access": "UNLIMITED"}
-    raise HTTPException(status_code=403, detail="Invalid Access Code")
+@app.get("/hangar/stats")
+def get_hangar_stats(code: str):
+    if code == "5795":
+        return agent_manager.get_hangar_stats()
+    raise HTTPException(status_code=403, detail="Unauthorized")
 
 @app.get("/dossiers")
-def get_dossiers():
+def get_dossiers(email: Optional[str] = None):
     res = supabase.table("dossiers").select("*").order("created_at", desc=True).execute()
     return res.data
 
 @app.post("/dossiers")
-async def create_dossier(title: str, case_type: str, jurisdiction: str, description: str):
+async def create_dossier(case: CaseCreate):
     dossier_id = str(uuid.uuid4())
     
-    # Run Quantum Analysis
     q_result = quantum_engine.collapse_probability_space(dossier_id, [1, 0])
     
-    # Generate VORTEX Strategic Report
-    report = await llm_service.get_response(f"Generate full strategic legal report for: {description}")
+    report = await llm_service.get_response(
+        f"Generate full strategic legal report for: {case.description}",
+        firm_type=case.firm_division
+    )
     
     data = {
         "id": dossier_id,
-        "title": title,
-        "case_type": case_type,
-        "jurisdiction": jurisdiction,
-        "description": description,
+        "title": case.title,
+        "case_type": case.case_type,
+        "jurisdiction": case.jurisdiction,
+        "description": case.description,
         "report": f"{q_result['status']}\n\n{report}",
         "status": "Complete",
-        "payment_committed": False,
+        "payment_committed": True if case.creator_bypass else False,
         "created_at": datetime.datetime.utcnow().isoformat()
     }
     
@@ -69,7 +77,7 @@ async def create_dossier(title: str, case_type: str, jurisdiction: str, descript
     raise HTTPException(status_code=500, detail="Supabase Insert Failed")
 
 @app.post("/dossiers/{id}/commit")
-def commit_payment(id: str):
+def commit_payment(id: str, email: Optional[str] = None):
     res = supabase.table("dossiers").update({"payment_committed": True}).eq("id", id).execute()
     return res.data
 
