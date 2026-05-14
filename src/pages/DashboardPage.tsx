@@ -29,18 +29,19 @@ export default function DashboardPage() {
       });
   }, [userFirm]);
 
-  const firmConfig = {
+  const firmConfig: Record<string, { icon: any; color: string; bg: string }> = {
     'Corporate': { icon: Briefcase, color: 'text-blue-500', bg: 'bg-blue-500/10' },
     'Criminal Defense': { icon: Shield, color: 'text-red-500', bg: 'bg-red-500/10' },
     'Family Law': { icon: Heart, color: 'text-pink-500', bg: 'bg-pink-500/10' }
-  }[userFirm as keyof typeof firmConfig] || { icon: Scale, color: 'text-primary', bg: 'bg-primary/10' };
+  };
+  const config = firmConfig[userFirm] || { icon: Scale, color: 'text-primary', bg: 'bg-primary/10' };
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700 pb-20">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-6">
         <div className="flex items-center gap-4">
-           <div className={`w-14 h-14 rounded-2xl ${firmConfig.bg} flex items-center justify-center border border-border/50`}>
-              <firmConfig.icon className={`h-8 w-8 ${firmConfig.color}`} />
+           <div className={`w-14 h-14 rounded-2xl ${config.bg} flex items-center justify-center border border-border/50`}>
+              <config.icon className={`h-8 w-8 ${config.color}`} />
            </div>
            <div>
               <h1 className="text-3xl font-display font-bold">{userFirm} Hub</h1>

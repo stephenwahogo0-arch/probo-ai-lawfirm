@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { OctopusAgentMap } from '@/components/visualizations/OctopusAgentMap';
 import { Card } from '@/components/ui/card';
-import { Shield, Zap, Users, BarChart3, Wallet, Coins, Globe, Target, Briefcase, Activity, Server } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Shield, Zap, Users, Coins, Globe, Target, Briefcase, Activity, Server } from 'lucide-react';
 
 export const HangarPage: React.FC = () => {
   const [stats, setStats] = useState<any>(null);
@@ -137,11 +138,11 @@ export const HangarPage: React.FC = () => {
         <div className="space-y-6">
           <Card className="p-6">
              <h3 className="text-sm font-bold uppercase tracking-widest opacity-50 flex items-center gap-2 mb-6">
-                <Zap className="h-4 w-4" /> Agentic Mesh Propagation
-              </h3>
-              <div className="h-[400px]">
-                <OctopusAgentMap />
-              </div>
+               <Zap className="h-4 w-4" /> Agentic Mesh Propagation
+             </h3>
+             <div className="h-[400px]">
+               <OctopusAgentMap />
+             </div>
           </Card>
 
           <Card className="p-6 border-primary/30 shadow-xl shadow-primary/5">

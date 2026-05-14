@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { 
-  ArrowLeft, Scale, ShieldCheck, Zap, Smartphone, Globe, 
+  ArrowLeft, Scale, ShieldCheck, Zap, Globe, 
   CreditCard, Wallet, Landmark, Bitcoin, Loader2, Send, Bot, User, Briefcase, Shield, Heart 
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -56,17 +56,18 @@ export default function CaseDetailPage() {
     setTimeout(() => {
       setMessages(prev => [...prev, { 
         role: 'assistant', 
-        content: `VORTEX ${userFirm.toUpperCase()} COUNCIL: Our Managing Partner has reviewed your query. Based on the specialized protocols for ${userFirm}, we have identified a high-leverage entry point. The sub-agent swarm is now calculating the optimal filing timeline.` 
+        content: `VORTEX ${userFirm.toUpperCase()} COUNCIL: Our Managing Partner has reviewed your query. Based on the specialized protocols for ${userFirm}, we have identified a high-leverage ent[...]"
       }]);
       setSending(false);
     }, 1500);
   };
 
-  const firmIcon = {
+  const firmIconMap: Record<string, any> = {
     'Corporate': Briefcase,
     'Criminal Defense': Shield,
     'Family Law': Heart
-  }[userFirm as keyof typeof firmIcon] || Scale;
+  };
+  const firmIcon = firmIconMap[userFirm] || Scale;
 
   if (loading) return <div className="p-20 text-center animate-pulse font-display text-xl uppercase tracking-widest">Entangling {userFirm} Nodes...</div>;
   if (!caseData) return <div className="p-20 text-center">Vector not found.</div>;
@@ -92,7 +93,10 @@ export default function CaseDetailPage() {
           </p>
         </div>
         <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
-           {React.createElement(firmIcon, { className: "h-6 w-6 text-primary" })}
+           {(() => {
+             const Icon = firmIcon;
+             return <Icon className="h-6 w-6 text-primary" />;
+           })()}
         </div>
       </div>
 
@@ -112,7 +116,7 @@ export default function CaseDetailPage() {
              </div>
              {messages.map((m, i) => (
                 <div key={i} className={cn("flex gap-3 max-w-[80%]", m.role === 'user' ? "ml-auto flex-row-reverse" : "")}>
-                   <div className={cn("w-8 h-8 rounded-full flex items-center justify-center shrink-0 border", m.role === 'user' ? "bg-secondary border-secondary-foreground/20" : "bg-primary/10 border-primary/20")}>
+                   <div className={cn("w-8 h-8 rounded-full flex items-center justify-center shrink-0 border", m.role === 'user' ? "bg-secondary border-secondary-foreground/20" : "bg-primary/10")}>
                       {m.role === 'user' ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4 text-primary" />}
                    </div>
                    <div className={cn("p-4 rounded-2xl text-sm shadow-sm", m.role === 'user' ? "bg-primary text-primary-foreground font-medium" : "bg-muted border border-border text-foreground")}>
@@ -195,12 +199,15 @@ export default function CaseDetailPage() {
                    { icon: Wallet, label: "Sendwave", color: "orange" },
                    { icon: Landmark, label: "WorldRemit", color: "green" },
                    { icon: Bitcoin, label: "Binance P2P", color: "yellow" }
-                 ].map((pay, i) => (
-                   <Card key={i} className="p-4 flex items-center gap-3 border-border/50 hover:border-primary/50 transition-all cursor-pointer hover:bg-primary/5 group">
-                      <pay.icon className={cn("h-5 w-5", `text-${pay.color}-500`)} />
-                      <span className="text-[10px] font-bold uppercase tracking-tighter group-hover:text-primary">{pay.label}</span>
-                   </Card>
-                 ))}
+                 ].map((pay, i) => {
+                   const PayIcon = pay.icon;
+                   return (
+                     <Card key={i} className="p-4 flex items-center gap-3 border-border/50 hover:border-primary/50 transition-all cursor-pointer hover:bg-primary/5 group">
+                        <PayIcon className={cn("h-5 w-5", `text-${pay.color}-500`)} />
+                        <span className="text-[10px] font-bold uppercase tracking-tighter group-hover:text-primary">{pay.label}</span>
+                     </Card>
+                   );
+                 })}
               </div>
               <Card className="p-5 bg-muted/40 border-border/50 border-l-4 border-l-primary">
                  <p className="text-[10px] uppercase tracking-widest font-bold opacity-60 mb-3 text-primary">Mobile Money Instructions</p>

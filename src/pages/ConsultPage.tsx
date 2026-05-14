@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { MessageSquare, Zap, Bot, Send, Loader2, User } from 'lucide-react';
+import { useState } from 'react';
+import { MessageSquare, Bot, Send, Loader2, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 
 export default function ConsultPage() {
@@ -18,7 +18,7 @@ export default function ConsultPage() {
     setTimeout(() => {
       setMessages(prev => [...prev, { 
         role: 'assistant', 
-        content: "The VORTEX Swarm has processed your query. Our consensus suggests that under the current democratic bedrock and rule of law, your position remains defensible through procedural interference. Would you like us to mobilize the sub-agent network for a full simulation?" 
+        content: "The VORTEX Swarm has processed your query. Our consensus suggests that under the current democratic bedrock and rule of law, your position remains defensible through procedural i[...]"
       }]);
       setLoading(false);
     }, 1500);
@@ -35,7 +35,7 @@ export default function ConsultPage() {
       </div>
 
       <Card className="h-[600px] flex flex-col overflow-hidden border-border/50 shadow-xl bg-card/30 backdrop-blur-sm">
-        <CardContent className="flex-grow p-6 overflow-y-auto space-y-4">
+        <div className="flex-grow p-6 overflow-y-auto space-y-4">
           {messages.length === 0 && (
             <div className="h-full flex flex-col items-center justify-center text-center space-y-4 opacity-40">
               <Bot className="h-12 w-12" />
@@ -62,7 +62,7 @@ export default function ConsultPage() {
               </div>
             </div>
           )}
-        </CardContent>
+        </div>
         <div className="p-4 border-t border-border bg-background/50">
           <div className="flex gap-2">
             <Input 
