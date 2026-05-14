@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { MessageSquare, Zap, Bot, Send, Loader2, User } from 'lucide-react';
+import { useState } from 'react';
+import { MessageSquare, Bot, Send, Loader2, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -25,7 +25,7 @@ export default function ConsultPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in duration-500">
       <div className="flex items-center gap-3">
         <MessageSquare className="h-8 w-8 text-primary" />
         <div>
@@ -35,11 +35,11 @@ export default function ConsultPage() {
       </div>
 
       <Card className="h-[600px] flex flex-col overflow-hidden border-border/50 shadow-xl bg-card/30 backdrop-blur-sm">
-        <CardContent className="flex-grow p-6 overflow-y-auto space-y-4">
+        <CardContent className="flex-grow p-6 overflow-y-auto space-y-4 custom-scrollbar">
           {messages.length === 0 && (
             <div className="h-full flex flex-col items-center justify-center text-center space-y-4 opacity-40">
               <Bot className="h-12 w-12" />
-              <p className="text-sm italic">"Ask any legal question. The entire mesh is listening."</p>
+              <p className="text-sm italic font-medium">"Ask any legal question. The entire mesh is listening."</p>
             </div>
           )}
           {messages.map((m, i) => (
@@ -47,7 +47,7 @@ export default function ConsultPage() {
               <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 border ${m.role === 'user' ? 'bg-secondary' : 'bg-primary/10'}`}>
                 {m.role === 'user' ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4 text-primary" />}
               </div>
-              <div className={`p-4 rounded-2xl text-sm ${m.role === 'user' ? 'bg-primary text-primary-foreground shadow-lg' : 'bg-muted border border-border'}`}>
+              <div className={`p-4 rounded-2xl text-sm ${m.role === 'user' ? 'bg-primary text-primary-foreground shadow-lg font-medium' : 'bg-muted border border-border text-foreground'}`}>
                 {m.content}
               </div>
             </div>
@@ -57,7 +57,7 @@ export default function ConsultPage() {
               <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
                 <Loader2 className="h-4 w-4 animate-spin text-primary" />
               </div>
-              <div className="p-4 rounded-2xl bg-muted border border-border text-xs italic opacity-50">
+              <div className="p-4 rounded-2xl bg-muted border border-border text-[10px] uppercase font-bold opacity-40">
                 Major agent synchronizing with sub-network...
               </div>
             </div>
@@ -71,6 +71,7 @@ export default function ConsultPage() {
               onKeyDown={e => e.key === 'Enter' && handleSend()}
               placeholder="Query the Singularity..." 
               className="h-12"
+              disabled={loading}
             />
             <Button onClick={handleSend} disabled={loading || !input.trim()} className="h-12 w-12 p-0">
               <Send className="h-5 w-5" />

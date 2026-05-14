@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { 
-  ArrowLeft, Scale, ShieldCheck, Zap, Smartphone, Globe, 
+  ArrowLeft, Scale, ShieldCheck, Zap, Globe, 
   CreditCard, Wallet, Landmark, Bitcoin, Loader2, Send, Bot, User, Briefcase, Shield, Heart 
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -25,7 +25,7 @@ export default function CaseDetailPage() {
   const userFirm = localStorage.getItem('user_firm') || 'Corporate';
 
   useEffect(() => {
-    fetch(`http://localhost:8000/dossiers`)
+    fetch(`/api/dossiers`)
       .then(res => res.json())
       .then(data => {
         const c = data.find((x: any) => x.id === id);
@@ -41,7 +41,7 @@ export default function CaseDetailPage() {
   const handleCommit = async () => {
     setCommitting(true);
     const email = localStorage.getItem('user_email');
-    await fetch(`http://localhost:8000/dossiers/${id}/commit?email=${email}`, { method: 'POST' });
+    await fetch(`/api/dossiers/${id}/commit?email=${email}`, { method: 'POST' });
     setCaseData({ ...caseData, payment_committed: true });
     setCommitting(false);
   };
@@ -62,11 +62,12 @@ export default function CaseDetailPage() {
     }, 1500);
   };
 
-  const firmIcon = {
+  const firmIconMap: Record<string, any> = {
     'Corporate': Briefcase,
     'Criminal Defense': Shield,
     'Family Law': Heart
-  }[userFirm as keyof typeof firmIcon] || Scale;
+  };
+  const firmIcon = firmIconMap[userFirm] || Scale;
 
   if (loading) return <div className="p-20 text-center animate-pulse font-display text-xl uppercase tracking-widest">Entangling {userFirm} Nodes...</div>;
   if (!caseData) return <div className="p-20 text-center">Vector not found.</div>;

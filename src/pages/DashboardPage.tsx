@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Plus, Scale, Zap, Clock, ShieldCheck, ChevronRight, 
   Briefcase, Shield, Heart, CheckCircle2 
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
 export default function DashboardPage() {
@@ -15,25 +15,26 @@ export default function DashboardPage() {
   const userFirm = localStorage.getItem('user_firm') || 'Corporate';
 
   useEffect(() => {
-    fetch('http://localhost:8000/dossiers')
+    fetch('/api/dossiers')
       .then(res => res.json())
       .then(data => {
         setCases(data);
         setLoading(false);
       });
       
-    fetch('http://localhost:8000/hangar/stats?code=5795')
+    fetch('/api/hangar/stats?code=5795')
       .then(res => res.json())
       .then(data => {
         setFunctions(data.firm_functions[userFirm] || []);
       });
   }, [userFirm]);
 
-  const firmConfig = {
+  const firmConfigMap: Record<string, any> = {
     'Corporate': { icon: Briefcase, color: 'text-blue-500', bg: 'bg-blue-500/10' },
     'Criminal Defense': { icon: Shield, color: 'text-red-500', bg: 'bg-red-500/10' },
     'Family Law': { icon: Heart, color: 'text-pink-500', bg: 'bg-pink-500/10' }
-  }[userFirm as keyof typeof firmConfig] || { icon: Scale, color: 'text-primary', bg: 'bg-primary/10' };
+  };
+  const firmConfig = firmConfigMap[userFirm] || { icon: Scale, color: 'text-primary', bg: 'bg-primary/10' };
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700 pb-20">
@@ -65,7 +66,9 @@ export default function DashboardPage() {
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                {functions.map((fn, i) => {
-                 const [title, desc] = fn.split(':');
+                 const parts = fn.split(':');
+                 const title = parts[0];
+                 const desc = parts.slice(1).join(':');
                  return (
                    <Card key={i} className="p-4 bg-card/30 border-border/50 hover:border-primary/30 transition-colors">
                       <p className="text-xs font-bold text-primary mb-1 flex items-center gap-2">
@@ -118,12 +121,12 @@ export default function DashboardPage() {
         </div>
         
         <div className="space-y-6">
-           <Card className="h-fit border-border/50 bg-muted/20">
-              <div className="p-6 border-b border-border bg-card/30">
+           <Card className="h-fit border-border/50 bg-muted/20 p-6">
+              <div className="border-b border-border bg-card/30 mb-4 pb-4">
                  <h3 className="font-display font-bold text-lg mb-1">Leadership Node</h3>
                  <p className="text-[10px] uppercase tracking-widest opacity-60">Synchronized Counsel</p>
               </div>
-              <div className="p-6 space-y-6">
+              <div className="space-y-6">
                  <div className="flex items-start gap-4">
                     <div className="w-10 h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center font-bold text-primary">M</div>
                     <div>

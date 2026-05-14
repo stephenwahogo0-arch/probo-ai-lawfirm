@@ -3,6 +3,7 @@ import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { Scale, LayoutDashboard, Plus, MessageSquare, Zap, Palette, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/lib/ThemeContext';
+import { Analytics } from '@vercel/analytics/react';
 
 const Layout: React.FC = () => {
   const { theme, setTheme } = useTheme();
@@ -64,7 +65,7 @@ const Layout: React.FC = () => {
             </Button>
 
             {showSecretInput && (
-              <form onSubmit={handleSecretSubmit} className="absolute top-16 right-4 bg-card p-2 border border-border rounded shadow-xl animate-in fade-in slide-in-from-top-2">
+              <form onSubmit={handleSecretSubmit} className="absolute top-16 right-4 bg-card p-2 border border-border rounded shadow-xl animate-in fade-in slide-in-from-top-2 z-[100]">
                 <input
                   type="password"
                   placeholder="Secret Code"
@@ -101,6 +102,7 @@ const Layout: React.FC = () => {
           </div>
         </div>
       </footer>
+      <Analytics />
     </div>
   );
 };

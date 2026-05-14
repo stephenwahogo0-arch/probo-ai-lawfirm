@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { OctopusAgentMap } from '@/components/visualizations/OctopusAgentMap';
 import { Card } from '@/components/ui/card';
-import { Shield, Zap, Users, BarChart3, Wallet, Coins, Globe, Target, Briefcase, Activity, Server } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Shield, Zap, Users, Coins, Globe, Target, Briefcase, Activity, Server } from 'lucide-react';
 
-export const HangarPage: React.FC = () => {
+export const HangarPage = () => {
   const [stats, setStats] = useState<any>(null);
 
   useEffect(() => {
@@ -14,7 +15,7 @@ export const HangarPage: React.FC = () => {
     }
 
     const fetchStats = () => {
-      fetch('http://localhost:8000/hangar/stats?code=5795')
+      fetch('/api/hangar/stats?code=5795')
         .then(res => res.json())
         .then(data => setStats(data))
         .catch(err => console.error(err));
@@ -25,7 +26,7 @@ export const HangarPage: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
-  if (!stats) return <div className="p-20 text-center animate-pulse">AUTHENTICATING CREATOR ACCESS...</div>;
+  if (!stats) return <div className="p-20 text-center animate-pulse text-primary font-display font-bold uppercase tracking-widest">Authenticating Creator Access...</div>;
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-20">
@@ -37,7 +38,7 @@ export const HangarPage: React.FC = () => {
           <p className="text-muted-foreground uppercase tracking-widest text-xs">Restricted Access — Creator Command Center</p>
         </div>
         <div className="text-right">
-          <div className="text-xs text-muted-foreground">Network Treasury</div>
+          <div className="text-xs text-muted-foreground uppercase font-bold tracking-widest opacity-60">Network Treasury</div>
           <div className="text-xl font-mono text-primary font-bold">{stats.network_treasury} ETH</div>
         </div>
       </div>
@@ -49,7 +50,7 @@ export const HangarPage: React.FC = () => {
             <h2 className="font-bold text-sm uppercase tracking-tighter">Live Swarm</h2>
           </div>
           <p className="text-2xl font-display font-bold">{stats.total_agents.toLocaleString()}</p>
-          <p className="text-[10px] opacity-60">ACROSS 3 SPECIALIZED FIRMS</p>
+          <p className="text-[10px] opacity-60 font-bold uppercase">10,002,000 Agents Active</p>
         </Card>
 
         <Card className="p-4 bg-secondary/5 border-secondary/20">
@@ -58,7 +59,7 @@ export const HangarPage: React.FC = () => {
             <h2 className="font-bold text-sm uppercase tracking-tighter">Bittensor Yield</h2>
           </div>
           <p className="text-2xl font-display font-bold">{stats.bittensor.total_earned} TAO</p>
-          <p className="text-[10px] opacity-60">DAILY EMISSION: {stats.bittensor.daily_emission} TAO</p>
+          <p className="text-[10px] opacity-60 font-bold uppercase">DAILY EMISSION: {stats.bittensor.daily_emission} TAO</p>
         </Card>
 
         <Card className="p-4 bg-accent/5 border-accent/20">
@@ -67,7 +68,7 @@ export const HangarPage: React.FC = () => {
             <h2 className="font-bold text-sm uppercase tracking-tighter">Bounties</h2>
           </div>
           <p className="text-2xl font-display font-bold">{stats.workprotocol_bounties}</p>
-          <p className="text-[10px] opacity-60">WORKPROTOCOL REAL-TIME</p>
+          <p className="text-[10px] opacity-60 font-bold uppercase">WORKPROTOCOL REAL-TIME</p>
         </Card>
 
         <Card className="p-4 bg-muted/30 border-border/50">
@@ -76,7 +77,7 @@ export const HangarPage: React.FC = () => {
             <h2 className="font-bold text-sm uppercase tracking-tighter">Economy</h2>
           </div>
           <p className="text-2xl font-display font-bold">VIRTUALS</p>
-          <p className="text-[10px] opacity-60">TOKENIZED LAUNCHPAD ACTIVE</p>
+          <p className="text-[10px] opacity-60 font-bold uppercase">TOKENIZED LAUNCHPAD ACTIVE</p>
         </Card>
       </div>
 
@@ -95,8 +96,8 @@ export const HangarPage: React.FC = () => {
                              <p className="text-sm font-bold text-primary">{sn.name}</p>
                           </div>
                           <div className="text-right">
-                             <p className="text-xs font-mono font-bold">+{sn.yield_24h} TAO</p>
-                             <p className="text-[9px] opacity-50 uppercase">24H Yield</p>
+                             <p className="text-xs font-mono font-bold text-green-500">+{sn.yield_24h} TAO</p>
+                             <p className="text-[9px] opacity-50 uppercase font-bold">24H Yield</p>
                           </div>
                        </div>
                        <div className="flex justify-between text-[9px] font-bold uppercase tracking-widest pt-2 border-t border-border/30">
@@ -121,7 +122,7 @@ export const HangarPage: React.FC = () => {
                           </div>
                           <div>
                              <p className="text-xs font-bold">{b.agent}</p>
-                             <p className="text-[10px] opacity-60">{b.task}</p>
+                             <p className="text-[10px] opacity-60 font-medium">{b.task}</p>
                           </div>
                        </div>
                        <div className="text-right">
