@@ -15,7 +15,7 @@ export const HangarPage = () => {
     }
 
     const fetchStats = () => {
-      fetch('/api/hangar/stats?code=5795')
+      fetch('/_/backend/hangar/stats?code=5795')
         .then(res => res.json())
         .then(data => setStats(data))
         .catch(err => console.error(err));

@@ -25,7 +25,7 @@ export default function CaseDetailPage() {
   const userFirm = localStorage.getItem('user_firm') || 'Corporate';
 
   useEffect(() => {
-    fetch(`/api/dossiers`)
+    fetch(`/_/backend/dossiers`)
       .then(res => res.json())
       .then(data => {
         const c = data.find((x: any) => x.id === id);
@@ -41,7 +41,7 @@ export default function CaseDetailPage() {
   const handleCommit = async () => {
     setCommitting(true);
     const email = localStorage.getItem('user_email');
-    await fetch(`/api/dossiers/${id}/commit?email=${email}`, { method: 'POST' });
+    await fetch(`/_/backend/dossiers/${id}/commit?email=${email}`, { method: 'POST' });
     setCaseData({ ...caseData, payment_committed: true });
     setCommitting(false);
   };

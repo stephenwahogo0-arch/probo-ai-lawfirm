@@ -15,14 +15,14 @@ export default function DashboardPage() {
   const userFirm = localStorage.getItem('user_firm') || 'Corporate';
 
   useEffect(() => {
-    fetch('/api/dossiers')
+    fetch('/_/backend/dossiers')
       .then(res => res.json())
       .then(data => {
         setCases(data);
         setLoading(false);
       });
       
-    fetch('/api/hangar/stats?code=5795')
+    fetch('/_/backend/hangar/stats?code=5795')
       .then(res => res.json())
       .then(data => {
         setFunctions(data.firm_functions[userFirm] || []);
