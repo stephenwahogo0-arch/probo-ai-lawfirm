@@ -98,3 +98,4 @@ yarl==1.23.0
 zstandard==0.25.0
 web3==7.8.0
 eth-account==0.13.5
+upstash-redis==1.7.0
