@@ -66,8 +66,9 @@ export default function NewCasePage() {
         <Card className="p-8 space-y-6 bg-card/50 backdrop-blur-sm border-border/50 shadow-2xl">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-widest opacity-60">Case Title / Reference</label>
+              <label htmlFor="case-title" className="text-xs font-bold uppercase tracking-widest opacity-60">Case Title / Reference</label>
               <Input 
+                id="case-title"
                 placeholder="e.g. Acme Corp Merger" 
                 value={form.title}
                 onChange={e => setForm({...form, title: e.target.value})}
@@ -76,8 +77,9 @@ export default function NewCasePage() {
               />
             </div>
             <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-widest opacity-60">Legal Domain</label>
+              <label htmlFor="case-type" className="text-xs font-bold uppercase tracking-widest opacity-60">Legal Domain</label>
               <select 
+                id="case-type"
                 className="w-full bg-background/50 border border-border h-10 px-3 rounded-md text-sm font-medium"
                 value={form.case_type}
                 onChange={e => setForm({...form, case_type: e.target.value})}
@@ -88,8 +90,9 @@ export default function NewCasePage() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs font-bold uppercase tracking-widest opacity-60">Jurisdiction (Target Court)</label>
+            <label htmlFor="case-jurisdiction" className="text-xs font-bold uppercase tracking-widest opacity-60">Jurisdiction (Target Court)</label>
             <Input 
+              id="case-jurisdiction"
               placeholder="e.g. Kenya — High Court" 
               value={form.jurisdiction}
               onChange={e => setForm({...form, jurisdiction: e.target.value})}
@@ -99,8 +102,9 @@ export default function NewCasePage() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs font-bold uppercase tracking-widest opacity-60">Full Case Description</label>
+            <label htmlFor="case-description" className="text-xs font-bold uppercase tracking-widest opacity-60">Full Case Description</label>
             <Textarea 
+              id="case-description"
               placeholder="Provide exhaustive details. The VORTEX mesh requires precise data for probability collapse..." 
               className="min-h-[250px] bg-background/50 leading-relaxed"
               value={form.description}

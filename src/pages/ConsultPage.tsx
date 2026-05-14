@@ -71,8 +71,9 @@ export default function ConsultPage() {
               onKeyDown={e => e.key === 'Enter' && handleSend()}
               placeholder="Query the Singularity..." 
               className="h-12"
+              aria-label="Message query"
             />
-            <Button onClick={handleSend} disabled={loading || !input.trim()} className="h-12 w-12 p-0">
+            <Button onClick={handleSend} disabled={loading || !input.trim()} className="h-12 w-12 p-0" aria-label="Send message">
               <Send className="h-5 w-5" />
             </Button>
           </div>

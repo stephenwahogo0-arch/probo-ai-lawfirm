@@ -51,6 +51,7 @@ const Layout: React.FC = () => {
               size="icon"
               onClick={() => setTheme(theme === 'botanical' ? 'navy' : 'botanical')}
               title="Switch Theme"
+              aria-label="Toggle theme"
             >
               <Palette className="h-5 w-5" />
             </Button>
@@ -59,6 +60,7 @@ const Layout: React.FC = () => {
               variant="ghost"
               size="icon"
               onClick={() => setShowSecretInput(!showSecretInput)}
+              aria-label="Open secret access"
             >
               <Lock className="h-4 w-4 opacity-30" />
             </Button>

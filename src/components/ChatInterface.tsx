@@ -60,8 +60,8 @@ export default function ChatInterface({ caseContext }: { caseContext?: string })
       </ScrollArea>
       <div className="p-8 border-t border-border bg-muted/20">
         <div className="flex gap-4">
-          <Textarea value={input} onChange={(e: any) => setInput(e.target.value)} onKeyDown={(e: any) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSend())} placeholder="Inquire Neural Network..." className="bg-card border-border rounded-2xl p-6 font-bold focus:ring-primary min-h-[80px]" disabled={sending} />
-          <Button onClick={handleSend} disabled={sending || !input.trim()} className="bg-primary text-primary-foreground h-20 w-20 rounded-2xl shadow-xl shadow-primary/20 hover:scale-105 transition-transform"><Send className="h-6 w-6" /></Button>
+          <Textarea value={input} onChange={(e: any) => setInput(e.target.value)} onKeyDown={(e: any) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSend())} placeholder="Inquire Neural Network..." className="bg-card border-border rounded-2xl p-6 font-bold focus:ring-primary min-h-[80px]" disabled={sending} aria-label="Message query" />
+          <Button onClick={handleSend} disabled={sending || !input.trim()} className="bg-primary text-primary-foreground h-20 w-20 rounded-2xl shadow-xl shadow-primary/20 hover:scale-105 transition-transform" aria-label="Send message"><Send className="h-6 w-6" /></Button>
         </div>
       </div>
     </div>
