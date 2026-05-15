@@ -59,6 +59,7 @@ const Layout: React.FC = () => {
               variant="ghost"
               size="icon"
               onClick={() => setShowSecretInput(!showSecretInput)}
+              aria-label="Toggle secret access"
             >
               <Lock className="h-4 w-4 opacity-30" />
             </Button>
