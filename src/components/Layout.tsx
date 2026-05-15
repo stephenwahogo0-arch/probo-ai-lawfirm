@@ -51,6 +51,7 @@ const Layout: React.FC = () => {
               size="icon"
               onClick={() => setTheme(theme === 'botanical' ? 'navy' : 'botanical')}
               title="Switch Theme"
+              aria-label="Switch Theme"
             >
               <Palette className="h-5 w-5" />
             </Button>
