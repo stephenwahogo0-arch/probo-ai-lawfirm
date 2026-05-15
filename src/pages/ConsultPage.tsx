@@ -71,9 +71,15 @@ export default function ConsultPage() {
               onKeyDown={e => e.key === 'Enter' && handleSend()}
               placeholder="Query the Singularity..." 
               className="h-12"
+              aria-label="Legal query input"
             />
-            <Button onClick={handleSend} disabled={loading || !input.trim()} className="h-12 w-12 p-0">
-              <Send className="h-5 w-5" />
+            <Button
+              onClick={handleSend}
+              disabled={loading || !input.trim()}
+              className="h-12 w-12 p-0"
+              aria-label="Send query"
+            >
+              {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
             </Button>
           </div>
         </div>
