@@ -10,12 +10,26 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
+interface Message {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+interface CaseData {
+  id: string;
+  title: string;
+  case_type: string;
+  jurisdiction: string;
+  payment_committed: boolean;
+  report: string;
+}
+
 export default function CaseDetailPage() {
   const { id } = useParams();
-  const [caseData, setCaseData] = useState<any>(null);
+  const [caseData, setCaseData] = useState<CaseData | null>(null);
   const [loading, setLoading] = useState(true);
   const [committing, setCommitting] = useState(false);
-  const [messages, setMessages] = useState<any[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -27,9 +41,9 @@ export default function CaseDetailPage() {
   useEffect(() => {
     fetch(`http://localhost:8000/dossiers`)
       .then(res => res.json())
-      .then(data => {
-        const c = data.find((x: any) => x.id === id);
-        setCaseData(c);
+      .then((data: CaseData[]) => {
+        const c = data.find((x) => x.id === id);
+        setCaseData(c || null);
         setLoading(false);
       });
   }, [id]);
@@ -42,13 +56,15 @@ export default function CaseDetailPage() {
     setCommitting(true);
     const email = localStorage.getItem('user_email');
     await fetch(`http://localhost:8000/dossiers/${id}/commit?email=${email}`, { method: 'POST' });
-    setCaseData({ ...caseData, payment_committed: true });
+    if (caseData) {
+      setCaseData({ ...caseData, payment_committed: true });
+    }
     setCommitting(false);
   };
 
   const handleSend = async () => {
     if (!input.trim()) return;
-    const userMsg = { role: 'user', content: input };
+    const userMsg: Message = { role: 'user', content: input };
     setMessages([...messages, userMsg]);
     setInput('');
     setSending(true);
@@ -56,13 +72,13 @@ export default function CaseDetailPage() {
     setTimeout(() => {
       setMessages(prev => [...prev, { 
         role: 'assistant', 
-        content: `VORTEX ${userFirm.toUpperCase()} COUNCIL: Our Managing Partner has reviewed your query. Based on the specialized protocols for ${userFirm}, we have identified a high-leverage ent[...]"
+        content: `VORTEX ${userFirm.toUpperCase()} COUNCIL: Our Managing Partner has reviewed your query. Based on the specialized protocols for ${userFirm}, we have identified a high-leverage ent[...]`
       }]);
       setSending(false);
     }, 1500);
   };
 
-  const firmIconMap: Record<string, any> = {
+  const firmIconMap: Record<string, typeof Briefcase> = {
     'Corporate': Briefcase,
     'Criminal Defense': Shield,
     'Family Law': Heart
@@ -138,7 +154,9 @@ export default function CaseDetailPage() {
            </CardContent>
            <div className="p-4 border-t border-border bg-muted/30">
               <div className="flex gap-2">
+                 <label htmlFor="case-query" className="sr-only">Query the Division Counsel</label>
                  <Input 
+                   id="case-query"
                    value={input} 
                    onChange={(e) => setInput(e.target.value)}
                    onKeyDown={(e) => e.key === 'Enter' && handleSend()}
@@ -146,7 +164,12 @@ export default function CaseDetailPage() {
                    disabled={sending}
                    className="bg-background h-12"
                  />
-                 <Button onClick={handleSend} disabled={sending || !input.trim()} className="h-12 w-12 p-0">
+                 <Button
+                   onClick={handleSend}
+                   disabled={sending || !input.trim()}
+                   className="h-12 w-12 p-0"
+                   aria-label="Send message"
+                 >
                     {sending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
                  </Button>
               </div>
