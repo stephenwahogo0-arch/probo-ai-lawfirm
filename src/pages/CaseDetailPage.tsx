@@ -154,7 +154,9 @@ export default function CaseDetailPage() {
            </CardContent>
            <div className="p-4 border-t border-border bg-muted/30">
               <div className="flex gap-2">
+                 <label htmlFor="case-query" className="sr-only">Query the Division Counsel</label>
                  <Input 
+                   id="case-query"
                    value={input} 
                    onChange={(e) => setInput(e.target.value)}
                    onKeyDown={(e) => e.key === 'Enter' && handleSend()}
@@ -162,7 +164,12 @@ export default function CaseDetailPage() {
                    disabled={sending}
                    className="bg-background h-12"
                  />
-                 <Button onClick={handleSend} disabled={sending || !input.trim()} className="h-12 w-12 p-0">
+                 <Button
+                   onClick={handleSend}
+                   disabled={sending || !input.trim()}
+                   className="h-12 w-12 p-0"
+                   aria-label="Send message"
+                 >
                     {sending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
                  </Button>
               </div>
