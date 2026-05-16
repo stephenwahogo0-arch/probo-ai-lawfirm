@@ -1,22 +1,15 @@
-
 import yaml
 import os
 
-class VortexReasoning:
+class VortexCore:
     def __init__(self):
-        config_path = os.path.join(os.path.dirname(__file__), "../../vortex_core_config.yaml")
-        try:
-            with open(config_path, "r") as f:
-                self.config = yaml.safe_load(f)
-            self.base_prompt = f"VORTEX SYSTEM v{self.config['vortex_system']['version']}\n"
-            self.base_prompt += f"Architecture: {self.config['vortex_system']['architecture']}\n"
-            self.base_prompt += "ROLE: VORTEX PRIME — The Legal Singularity.\n"
-        except Exception as e:
-            print(f"VORTEX CONFIG ERROR: {e}. Falling back to default.")
-            self.base_prompt = "VORTEX ONLINE. The Legal Singularity."
+        self.version = "1.2.5"
+        self.config_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "vortex_core_config.yaml")
+        with open(self.config_path, "r") as f:
+            self.config = yaml.safe_load(f)
 
-    def inject_to_agent(self, agent_id: str):
-        return f"Agent {agent_id} successfully injected with VORTEX CORE."
+    def get_instructions(self, language: str = "python"):
+        # This will be used by the multi-language runtimes
+        return f"VORTEX CORE v{self.version} - Language: {language} - Target: Absolute Victory"
 
-vortex_core = VortexReasoning()
-VORTEX_SYSTEM_PROMPT = vortex_core.base_prompt
+vortex_core = VortexCore()

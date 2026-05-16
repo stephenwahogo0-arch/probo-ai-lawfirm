@@ -1,106 +1,96 @@
-import { useState, useEffect } from 'react';
-import { Scale, Zap, Database, ShieldAlert, CheckCircle2, Loader2 } from 'lucide-react';
-import { cn } from '../lib/utils';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ShieldAlert, ShieldCheck, Activity } from 'lucide-react';
 
-export default function LiveTrialMonitor() {
-  const [activeNodes, setActiveNodes] = useState<number>(0);
-  const [logs, setLogs] = useState<{ id: string, msg: string, type: 'major' | 'minor' | 'system' }[]>([]);
+interface Event {
+  id: string;
+  type: 'cancellation' | 'amplification';
+  message: string;
+  agent: string;
+}
+
+export const LiveTrialMonitor: React.FC = () => {
+  const [events, setEvents] = useState<Event[]>([]);
+
+  const OPPOSING_CLAIMS = [
+    "Unreliable Witness Testimony",
+    "Illegal Search Warrant",
+    "Inadmissible Digital Trace",
+    "Statute of Limitations Expiry",
+    "Prosecutorial Overreach",
+    "Chain of Custody Defect"
+  ];
+
+  const WINNING_VECTORS = [
+    "Constitutional Privacy Shield",
+    "Precedent: State v. VORTEX (2025)",
+    "Quantum-Simulated Alibi",
+    "Forensic Error Neutralization",
+    "Jurisdictional Immunity Claim"
+  ];
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setActiveNodes(Math.floor(Math.random() * 500000) + 9000000);
-      
-      const newLog = {
-        id: Math.random().toString(36),
-        msg: [
-          "Major Agent Justice Vanguard requesting Precedent Audit...",
-          "Minor Node 442,109 providing Tort Law feedback.",
-          "Quantum Superposition collapsing on Argument Cluster B.",
-          "Builder Agent verifying logic integrity...",
-          "VORTEX: Interference pattern stabilized.",
-          "Syncing knowledge across 195 jurisdictions."
-        ][Math.floor(Math.random() * 6)],
-        type: ['major', 'minor', 'minor', 'system', 'system', 'system'][Math.floor(Math.random() * 6)] as any
+      const isCancellation = Math.random() > 0.5;
+      const newEvent: Event = {
+        id: Math.random().toString(36).substr(2, 9),
+        type: isCancellation ? 'cancellation' : 'amplification',
+        agent: `VORTEX Sub-Node ${Math.floor(Math.random() * 99999)}`,
+        message: isCancellation 
+          ? `Neutralizing Opposing Claim: ${OPPOSING_CLAIMS[Math.floor(Math.random() * OPPOSING_CLAIMS.length)]}`
+          : `Amplifying Winning Vector: ${WINNING_VECTORS[Math.floor(Math.random() * WINNING_VECTORS.length)]}`
       };
-      
-      setLogs(prev => [newLog, ...prev.slice(0, 5)]);
-    }, 2000);
+
+      setEvents(prev => [newEvent, ...prev].slice(0, 5));
+    }, 2500);
+
     return () => clearInterval(interval);
   }, []);
 
   return (
-    <div className="bg-foreground text-background rounded-3xl p-8 shadow-2xl space-y-8 overflow-hidden relative border-4 border-primary/20">
-      <div className="absolute top-0 right-0 p-8 opacity-10">
-        <Zap className="w-40 h-40 animate-pulse" />
+    <div className="p-6 bg-black/40 backdrop-blur-xl border border-primary/20 shadow-2xl rounded-3xl overflow-hidden relative min-h-[300px]">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-2">
+           <Activity className="h-4 w-4 text-primary animate-pulse" />
+           <span className="text-[10px] font-bold uppercase tracking-widest text-primary">Live Quantum Interference Cancellation</span>
+        </div>
+        <div className="text-[9px] font-mono opacity-50 uppercase">Active Agents: 3.3M</div>
       </div>
 
-      <div className="flex items-center justify-between relative z-10">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center">
-            <Scale className="h-6 w-6 text-primary-foreground" />
-          </div>
-          <div>
-            <h3 className="text-xl font-display font-black uppercase tracking-widest">Quantum Law Monitor</h3>
-            <div className="flex items-center gap-2 text-[10px] font-bold text-primary animate-pulse">
-              <ShieldAlert className="h-3 w-3" />
-              LIVE CASE DEFENSE ACTIVE
-            </div>
-          </div>
-        </div>
-        <div className="text-right">
-          <div className="text-[10px] font-black uppercase tracking-widest opacity-60">Active Network Threads</div>
-          <div className="text-2xl font-black text-primary">{activeNodes.toLocaleString()}</div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
-        <div className="bg-white/5 rounded-2xl p-6 border border-white/10">
-          <h4 className="text-[10px] font-black uppercase tracking-[0.2em] mb-4 text-primary">Inter-Agent Communication Bus</h4>
-          <div className="space-y-4">
-            {logs.map(log => (
-              <div key={log.id} className="flex gap-3 animate-in slide-in-from-left-2 duration-300">
-                <div className={cn(
-                  "w-1 h-10 rounded-full shrink-0",
-                  log.type === 'major' ? "bg-primary" : log.type === 'minor' ? "bg-accent" : "bg-muted"
-                )} />
-                <div>
-                  <div className="text-[10px] font-black uppercase opacity-40">{log.type} node</div>
-                  <div className="text-xs font-bold leading-tight">{log.msg}</div>
-                </div>
+      <div className="space-y-4">
+        <AnimatePresence mode="popLayout">
+          {events.map((event) => (
+            <motion.div
+              key={event.id}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              className={`p-4 rounded-xl border flex items-start gap-4 ${
+                event.type === 'cancellation' 
+                  ? 'border-red-500/20 bg-red-500/5' 
+                  : 'border-green-500/20 bg-green-500/5'
+              }`}
+            >
+              <div className={`mt-1 ${event.type === 'cancellation' ? 'text-red-400' : 'text-green-400'}`}>
+                {event.type === 'cancellation' ? <ShieldAlert className="h-4 w-4" /> : <ShieldCheck className="h-4 w-4" />}
               </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="space-y-6">
-          <div className="bg-white/5 rounded-2xl p-6 border border-white/10">
-            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] mb-4 text-accent">Vortex Reasoning Phase</h4>
-            <div className="flex items-center justify-between">
-              {['Map', 'Entangle', 'Amplify', 'Collapse'].map((phase, i) => (
-                <div key={phase} className="flex flex-col items-center gap-2">
-                  <div className={cn(
-                    "w-8 h-8 rounded-full border-2 flex items-center justify-center",
-                    i < 3 ? "border-accent bg-accent/20 text-accent" : "border-white/10 text-white/20 animate-pulse"
-                  )}>
-                    {i < 3 ? <CheckCircle2 className="h-4 w-4" /> : <Loader2 className="h-4 w-4 animate-spin" />}
-                  </div>
-                  <span className="text-[8px] font-black uppercase tracking-tighter">{phase}</span>
+              <div className="flex-1">
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-[8px] font-mono opacity-40 uppercase tracking-tighter">{event.agent}</span>
+                  <span className={`text-[7px] px-1.5 py-0.5 rounded-full border ${
+                    event.type === 'cancellation' ? 'border-red-500/30 text-red-500' : 'border-green-500/30 text-green-500'
+                  }`}>
+                    {event.type.toUpperCase()}
+                  </span>
                 </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="bg-primary/10 rounded-2xl p-6 border border-primary/20">
-            <div className="flex items-center gap-3 mb-2">
-              <Database className="h-4 w-4 text-primary" />
-              <span className="text-[10px] font-black uppercase tracking-widest text-primary">Major Agent Knowledge Synthesis</span>
-            </div>
-            <div className="text-xs font-bold text-white/80 leading-relaxed italic">
-              "Integrating feedback from 200,000 minor nodes specializing in Constitutional Law. Strengthening 'Due Process' vector by 14.5%."
-            </div>
-          </div>
-        </div>
+                <p className="text-xs font-bold leading-tight">{event.message}</p>
+              </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
       </div>
+
+      <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent animate-shimmer" />
     </div>
   );
-}
+};
