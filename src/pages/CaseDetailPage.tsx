@@ -10,12 +10,26 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
+interface Message {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+interface CaseData {
+  id: string;
+  title: string;
+  case_type: string;
+  jurisdiction: string;
+  payment_committed: boolean;
+  report: string;
+}
+
 export default function CaseDetailPage() {
   const { id } = useParams();
-  const [caseData, setCaseData] = useState<any>(null);
+  const [caseData, setCaseData] = useState<CaseData | null>(null);
   const [loading, setLoading] = useState(true);
   const [committing, setCommitting] = useState(false);
-  const [messages, setMessages] = useState<any[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -27,9 +41,9 @@ export default function CaseDetailPage() {
   useEffect(() => {
     fetch(`http://localhost:8000/dossiers`)
       .then(res => res.json())
-      .then(data => {
-        const c = data.find((x: any) => x.id === id);
-        setCaseData(c);
+      .then((data: CaseData[]) => {
+        const c = data.find((x) => x.id === id);
+        setCaseData(c || null);
         setLoading(false);
       });
   }, [id]);
@@ -42,13 +56,15 @@ export default function CaseDetailPage() {
     setCommitting(true);
     const email = localStorage.getItem('user_email');
     await fetch(`http://localhost:8000/dossiers/${id}/commit?email=${email}`, { method: 'POST' });
-    setCaseData({ ...caseData, payment_committed: true });
+    if (caseData) {
+      setCaseData({ ...caseData, payment_committed: true });
+    }
     setCommitting(false);
   };
 
   const handleSend = async () => {
     if (!input.trim()) return;
-    const userMsg = { role: 'user', content: input };
+    const userMsg: Message = { role: 'user', content: input };
     setMessages([...messages, userMsg]);
     setInput('');
     setSending(true);
@@ -62,7 +78,7 @@ export default function CaseDetailPage() {
     }, 1500);
   };
 
-  const firmIconMap: Record<string, any> = {
+  const firmIconMap: Record<string, typeof Briefcase> = {
     'Corporate': Briefcase,
     'Criminal Defense': Shield,
     'Family Law': Heart
