@@ -1,7 +1,7 @@
 import { supabase } from '@/lib/supabase';
 
 // FIXED: Implementing a 'cleanup' or 'timeout' logic for reserved agents
-export const bookAgentConsultation = async (agentId: string, userId: string) => {
+export const bookAgentConsultation = async (agentId: string, _userId: string) => {
   // Use a transaction or a specific status with an expiration timestamp
   const { error } = await supabase.from('agents')
     .update({ 
@@ -15,6 +15,7 @@ export const bookAgentConsultation = async (agentId: string, userId: string) => 
 
   try {
     // Attempt checkout...
+    console.log("Initializing secure checkout for user:", _userId);
   } catch (err) {
     // FIXED: Immediate rollback on failure to free inventory
     await supabase.from('agents')
