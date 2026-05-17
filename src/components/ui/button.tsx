@@ -1,10 +1,15 @@
-
 import * as React from "react"
 import { cn } from "@/lib/utils"
 
-const Button = React.forwardRef<HTMLButtonElement, React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: string, size?: string, asChild?: boolean }>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
-    // We'll ignore asChild for now to keep it simple, or we could use a slot pattern
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: string
+  size?: string
+  asChild?: boolean
+}
+
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant, size, asChild, ...props }, ref) => {
     return (
       <button
         className={cn(

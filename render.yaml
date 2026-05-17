@@ -1,0 +1,37 @@
+services:
+  - type: web
+    name: probo-law-backend
+    runtime: python
+    repo: https://github.com/stephenwahogo0-arch/probo-ai-lawfirm
+    branch: main
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: SUPABASE_URL
+        value: https://cxwqtjtaeaevpwegtwun.supabase.co
+      - key: SUPABASE_KEY
+        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN4d3F0anRhZWFldnB3ZWd0d3VuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0OTQ2NjcsImV4cCI6MjA5NDA3MDY2N30.Sieul34P9PO-ct0v7mzgFhS3aAnO73480k_FzC9a9b8
+      - key: IBM_QUANTUM_TOKEN
+        value: 422F8eyiFO6KeJpr4HgTa51nKixmzLWz9UrdCgE4ssKg
+      - key: OPENAI_API_KEY
+        value: "5795"
+      - key: ANTHROPIC_API_KEY
+        value: "5795"
+      - key: GEMINI_API_KEY
+        value: "5795"
+
+  - type: web
+    name: probo-law-frontend
+    runtime: static
+    repo: https://github.com/stephenwahogo0-arch/probo-ai-lawfirm
+    branch: main
+    buildCommand: npm install && npm run build
+    publishPath: dist
+    envVars:
+      - key: VITE_SUPABASE_URL
+        value: https://cxwqtjtaeaevpwegtwun.supabase.co
+      - key: VITE_SUPABASE_ANON_KEY
+        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN4d3F0anRhZWFldnB3ZWd0d3VuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0OTQ2NjcsImV4cCI6MjA5NDA3MDY2N30.Sieul34P9PO-ct0v7mzgFhS3aAnO73480k_FzC9a9b8
+      - key: VITE_API_BASE
+        value: https://probo-law-backend.onrender.com

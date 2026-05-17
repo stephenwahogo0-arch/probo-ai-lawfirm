@@ -1,3 +1,4 @@
+import type { Case } from "@/types";
 import { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { 
@@ -12,7 +13,7 @@ import { cn } from '@/lib/utils';
 
 export default function CaseDetailPage() {
   const { id } = useParams();
-  const [caseData, setCaseData] = useState<any>(null);
+  const [caseData, setCaseData] = useState<Case | null>(null);
   const [loading, setLoading] = useState(true);
   const [committing, setCommitting] = useState(false);
   const [messages, setMessages] = useState<any[]>([]);
@@ -25,7 +26,7 @@ export default function CaseDetailPage() {
   const userFirm = localStorage.getItem('user_firm') || 'Corporate';
 
   useEffect(() => {
-    fetch(`http://localhost:8000/dossiers`)
+    fetch(`${import.meta.env.VITE_API_BASE || 'http://localhost:8000'}/dossiers`)
       .then(res => res.json())
       .then(data => {
         const c = data.find((x: any) => x.id === id);
@@ -41,8 +42,8 @@ export default function CaseDetailPage() {
   const handleCommit = async () => {
     setCommitting(true);
     const email = localStorage.getItem('user_email');
-    await fetch(`http://localhost:8000/dossiers/${id}/commit?email=${email}`, { method: 'POST' });
-    setCaseData({ ...caseData, payment_committed: true });
+    await fetch(`${import.meta.env.VITE_API_BASE || 'http://localhost:8000'}/dossiers/${id}/commit?email=${email}`, { method: 'POST' });
+    if (caseData) setCaseData({ ...caseData, payment_committed: true });
     setCommitting(false);
   };
 
@@ -56,7 +57,7 @@ export default function CaseDetailPage() {
     setTimeout(() => {
       setMessages(prev => [...prev, { 
         role: 'assistant', 
-        content: `VORTEX ${userFirm.toUpperCase()} COUNCIL: Our Managing Partner has reviewed your query. Based on the specialized protocols for ${userFirm}, we have identified a high-leverage ent[...]"
+        content: `VORTEX ${userFirm.toUpperCase()} COUNCIL: Our Managing Partner has reviewed your query. Based on the specialized protocols for ${userFirm}, we have identified a high-leverage ent[...]`
       }]);
       setSending(false);
     }, 1500);

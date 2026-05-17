@@ -27,7 +27,7 @@ export default function NewCasePage() {
     const isCreator = localStorage.getItem('user_email') === 'stephenwahogoka0@gmail.com';
     
     try {
-      const res = await fetch('http://localhost:8000/dossiers', {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE || 'http://localhost:8000'}/dossiers`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 

@@ -18,14 +18,13 @@ export interface Agent {
 export interface Case {
   id: string;
   title: string;
-  type: string;
+  case_type: string;
   description: string;
   jurisdiction: string;
-  legalSystem: string;
-  status: 'Analyzing' | 'Complete' | 'In Court' | 'Closed';
-  winProbability: number;
+  status: string;
   report?: string;
-  createdAt: string;
+  payment_committed?: boolean;
+  created_at: string;
 }
 
 export interface LegalTheory {
