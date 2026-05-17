@@ -15,7 +15,7 @@ export const HangarPage: React.FC = () => {
     }
 
     const fetchStats = () => {
-      fetch('http://localhost:8000/hangar/stats?code=5795')
+      fetch(`${import.meta.env.VITE_API_BASE || 'http://localhost:8000'}/hangar/stats?code=5795`)
         .then(res => res.json())
         .then(data => setStats(data))
         .catch(err => console.error(err));

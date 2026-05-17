@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 
 interface Node {
@@ -15,48 +15,48 @@ interface Connection {
 }
 
 export const OctopusAgentMap: React.FC = () => {
-  const [nodes, setNodes] = useState<Node[]>([]);
-  const [connections, setConnections] = useState<Connection[]>([]);
-  const [activeComm, setActiveComm] = useState<{ id: string, type: 'legal' | 'finance' } | null>(null);
-
-  useEffect(() => {
+  const { initialNodes, initialConnections } = useMemo(() => {
     const centerX = 400;
     const centerY = 300;
     const majorNode: Node = { id: 'major-1', type: 'Major', x: centerX, y: centerY, label: 'MAJOR AGENT' };
     
-    const newNodes: Node[] = [majorNode];
-    const newConns: Connection[] = [];
+    const nodes: Node[] = [majorNode];
+    const conns: Connection[] = [];
 
     for (let i = 0; i < 8; i++) {
       const angle = (i * 2 * Math.PI) / 8;
       const x = centerX + Math.cos(angle) * 150;
       const y = centerY + Math.sin(angle) * 150;
       const minorId = `minor-${i}`;
-      newNodes.push({ id: minorId, type: 'Minor', x, y, label: `MINOR ${i}` });
-      newConns.push({ from: 'major-1', to: minorId });
+      nodes.push({ id: minorId, type: 'Minor', x, y, label: `MINOR ${i}` });
+      conns.push({ from: 'major-1', to: minorId });
 
       for (let j = 0; j < 3; j++) {
         const subAngle = angle + (j - 1) * 0.3;
         const subX = x + Math.cos(subAngle) * 80;
         const subY = y + Math.sin(subAngle) * 80;
         const subId = `sub-${i}-${j}`;
-        newNodes.push({ id: subId, type: 'Sub', x: subX, y: subY, label: `SUB ${j}` });
-        newConns.push({ from: minorId, to: subId });
+        nodes.push({ id: subId, type: 'Sub', x: subX, y: subY, label: `SUB ${j}` });
+        conns.push({ from: minorId, to: subId });
       }
     }
+    return { initialNodes: nodes, initialConnections: conns };
+  }, []);
 
-    setNodes(newNodes);
-    setConnections(newConns);
+  const [nodes] = useState<Node[]>(initialNodes);
+  const [connections] = useState<Connection[]>(initialConnections);
+  const [activeComm, setActiveComm] = useState<{ id: string, type: 'legal' | 'finance' } | null>(null);
 
+  useEffect(() => {
     const interval = setInterval(() => {
-      const randomConn = newConns[Math.floor(Math.random() * newConns.length)];
+      const randomConn = connections[Math.floor(Math.random() * connections.length)];
       const type = Math.random() > 0.3 ? 'legal' : 'finance';
       setActiveComm({ id: `${randomConn.from}->${randomConn.to}`, type });
       setTimeout(() => setActiveComm(null), 1200);
     }, 1800);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [connections]);
 
   return (
     <div className="relative w-full h-[600px] bg-background/50 rounded-xl overflow-hidden border border-border/50 backdrop-blur-sm shadow-inner">

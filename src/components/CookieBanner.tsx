@@ -1,22 +1,22 @@
-
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Shield, Settings, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 
 export default function CookieBanner() {
-  const [show, setShow] = useState(false);
+  const [show, setShow] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return !localStorage.getItem('vortex_cookie_consent');
+    }
+    return false;
+  });
+
   const [customizing, setCustomizing] = useState(false);
   const [preferences, setPreferences] = useState({
     essential: true,
     analytics: true,
     marketing: false
   });
-
-  useEffect(() => {
-    const consent = localStorage.getItem('vortex_cookie_consent');
-    if (!consent) setShow(true);
-  }, []);
 
   const acceptAll = () => {
     localStorage.setItem('vortex_cookie_consent', JSON.stringify({ ...preferences, marketing: true }));
@@ -54,7 +54,7 @@ export default function CookieBanner() {
                 <Settings className="h-5 w-5 text-primary" />
                 <h3 className="font-display font-bold">Protocol Customization</h3>
               </div>
-              <button onClick={() => setCustomizing(false)}><X className="h-4 w-4" /></button>
+              <button onClick={() => setCustomizing(false)} aria-label="Close customization"><X className="h-4 w-4" /></button>
             </div>
             
             <div className="space-y-4">
@@ -63,7 +63,7 @@ export default function CookieBanner() {
                   <p className="text-xs font-bold">Essential Neural Hooks</p>
                   <p className="text-[10px] text-muted-foreground">Required for VORTEX encryption.</p>
                 </div>
-                <input type="checkbox" checked disabled />
+                <input type="checkbox" checked readOnly />
               </div>
               <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
                 <div>

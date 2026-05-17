@@ -1,7 +1,7 @@
 
 import axios from 'axios';
 
-const API_BASE = 'http://localhost:8000';
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
 
 export class AIService {
   async unlock(code: string) {
@@ -9,7 +9,7 @@ export class AIService {
         const res = await axios.post(`${API_BASE}/unlock?code=${code}`);
         return res.data;
     } catch (e) {
-        throw new Error("VORTEX: Access Denied.");
+        throw new Error("VORTEX: Access Denied.", { cause: e });
     }
   }
 

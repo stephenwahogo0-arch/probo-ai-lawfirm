@@ -15,14 +15,14 @@ export default function DashboardPage() {
   const userFirm = localStorage.getItem('user_firm') || 'Corporate';
 
   useEffect(() => {
-    fetch('http://localhost:8000/dossiers')
+    fetch(`${import.meta.env.VITE_API_BASE || 'http://localhost:8000'}/dossiers`)
       .then(res => res.json())
       .then(data => {
         setCases(data);
         setLoading(false);
       });
       
-    fetch('http://localhost:8000/hangar/stats?code=5795')
+    fetch(`${import.meta.env.VITE_API_BASE || 'http://localhost:8000'}/hangar/stats?code=5795`)
       .then(res => res.json())
       .then(data => {
         setFunctions(data.firm_functions[userFirm] || []);
