@@ -36,7 +36,7 @@ export default function CaseDetailPage() {
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  }, [messages, sending]);
 
   const handleCommit = async () => {
     setCommitting(true);
@@ -56,7 +56,7 @@ export default function CaseDetailPage() {
     setTimeout(() => {
       setMessages(prev => [...prev, { 
         role: 'assistant', 
-        content: `VORTEX ${userFirm.toUpperCase()} COUNCIL: Our Managing Partner has reviewed your query. Based on the specialized protocols for ${userFirm}, we have identified a high-leverage ent[...]"
+        content: `VORTEX ${userFirm.toUpperCase()} COUNCIL: Our Managing Partner has reviewed your query. Based on the specialized protocols for ${userFirm}, we have identified a high-leverage entity for intervention.`
       }]);
       setSending(false);
     }, 1500);
@@ -146,7 +146,12 @@ export default function CaseDetailPage() {
                    disabled={sending}
                    className="bg-background h-12"
                  />
-                 <Button onClick={handleSend} disabled={sending || !input.trim()} className="h-12 w-12 p-0">
+                 <Button
+                   onClick={handleSend}
+                   disabled={sending || !input.trim()}
+                   className="h-12 w-12 p-0"
+                   aria-label={sending ? "Sending message..." : "Send message"}
+                 >
                     {sending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
                  </Button>
               </div>
