@@ -26,7 +26,7 @@ export default function CaseDetailPage() {
   const userFirm = localStorage.getItem('user_firm') || 'Corporate';
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_BASE || 'http://localhost:8000'}/dossiers`)
+    fetch(`${import.meta.env.VITE_API_BASE || '/vortex-api'}/dossiers`)
       .then(res => res.json())
       .then(data => {
         const c = data.find((x: any) => x.id === id);
@@ -42,7 +42,7 @@ export default function CaseDetailPage() {
   const handleCommit = async () => {
     setCommitting(true);
     const email = localStorage.getItem('user_email');
-    await fetch(`${import.meta.env.VITE_API_BASE || 'http://localhost:8000'}/dossiers/${id}/commit?email=${email}`, { method: 'POST' });
+    await fetch(`${import.meta.env.VITE_API_BASE || '/vortex-api'}/dossiers/${id}/commit?email=${email}`, { method: 'POST' });
     if (caseData) setCaseData({ ...caseData, payment_committed: true });
     setCommitting(false);
   };

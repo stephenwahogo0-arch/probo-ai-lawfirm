@@ -12,3 +12,9 @@
 - Created `render.yaml` for Blueprint-based deployment.
 - Primary Branch: `main`.
 - Production URLs mapped to `onrender.com`.
+
+## Deployment Expansion:
+- Configured `vercel.json` for Vercel deployment (Serverless FastAPI + Static Frontend).
+- Configured `netlify.toml` for Netlify deployment (SPA Redirects).
+- Consolidated GitHub Actions into a single, reliable `deploy.yml`.
+- Updated API fallback to `/vortex-api` for unified routing.
