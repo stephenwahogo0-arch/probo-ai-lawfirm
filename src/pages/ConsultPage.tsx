@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { MessageSquare, Bot, Send, Loader2, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -8,6 +8,11 @@ export default function ConsultPage() {
   const [messages, setMessages] = useState<any[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const chatEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, loading]);
 
   const handleSend = () => {
     if (!input.trim()) return;
@@ -18,7 +23,7 @@ export default function ConsultPage() {
     setTimeout(() => {
       setMessages(prev => [...prev, { 
         role: 'assistant', 
-        content: "The VORTEX Swarm has processed your query. Our consensus suggests that under the current democratic bedrock and rule of law, your position remains defensible through procedural i[...]"
+        content: "The VORTEX Swarm has processed your query. Our consensus suggests that under the current democratic bedrock and rule of law, your position remains defensible through procedural immunity."
       }]);
       setLoading(false);
     }, 1500);
@@ -62,6 +67,7 @@ export default function ConsultPage() {
               </div>
             </div>
           )}
+          <div ref={chatEndRef} />
         </div>
         <div className="p-4 border-t border-border bg-background/50">
           <div className="flex gap-2">
@@ -72,7 +78,12 @@ export default function ConsultPage() {
               placeholder="Query the Singularity..." 
               className="h-12"
             />
-            <Button onClick={handleSend} disabled={loading || !input.trim()} className="h-12 w-12 p-0">
+            <Button
+              onClick={handleSend}
+              disabled={loading || !input.trim()}
+              className="h-12 w-12 p-0"
+              aria-label="Send message"
+            >
               <Send className="h-5 w-5" />
             </Button>
           </div>
