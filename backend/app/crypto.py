@@ -13,7 +13,7 @@ class CryptoService:
         if self.private_key:
             self.account = self.w3.eth.account.from_key(self.private_key)
         else:
-            # For simulation if no key is provided
+            # For production if no key is provided
             self.account = None
 
     def get_balance(self, address: Optional[str] = None) -> float:

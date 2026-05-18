@@ -2,7 +2,7 @@
 import { supabase } from '@/lib/supabase';
 import axios from 'axios';
 
-const API_BASE = import.meta.env.VITE_API_BASE || '/vortex-api';
+const API_BASE = import.meta.env.VITE_API_BASE || '/api';
 
 export interface Case {
   id: string;

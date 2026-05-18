@@ -5,7 +5,6 @@ export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: string
   size?: string
-  /** @todo Implement Slot pattern. Currently accepted but not functional. */
   asChild?: boolean
 }
 

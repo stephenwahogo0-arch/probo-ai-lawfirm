@@ -15,7 +15,7 @@ export const HangarPage: React.FC = () => {
     }
 
     const fetchStats = () => {
-      fetch(`${import.meta.env.VITE_API_BASE || '/vortex-api'}/hangar/stats?code=5795`)
+      fetch(`${import.meta.env.VITE_API_BASE || '/api'}/hangar/stats?code=5795`)
         .then(res => res.json())
         .then(data => setStats(data))
         .catch(err => console.error(err));

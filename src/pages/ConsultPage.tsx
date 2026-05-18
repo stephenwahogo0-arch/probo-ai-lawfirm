@@ -3,25 +3,39 @@ import { MessageSquare, Bot, Send, Loader2, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import axios from 'axios';
+
+const API_BASE = import.meta.env.VITE_API_BASE || '/api';
 
 export default function ConsultPage() {
   const [messages, setMessages] = useState<any[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!input.trim()) return;
-    setMessages([...messages, { role: 'user', content: input }]);
+    const userMsg = { role: 'user', content: input };
+    setMessages([...messages, userMsg]);
     setInput('');
     setLoading(true);
 
-    setTimeout(() => {
+    try {
+      const res = await axios.post(`${API_BASE}/consult`, {
+        prompt: input,
+        firm_type: localStorage.getItem('user_firm') || 'Corporate'
+      });
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: res.data.content
+      }]);
+    } catch (e) {
       setMessages(prev => [...prev, { 
         role: 'assistant', 
-        content: "The VORTEX Swarm has processed your query. Our consensus suggests that under the current democratic bedrock and rule of law, your position remains defensible through procedural i[...]"
+        content: "CONNECTION ERROR: The VORTEX Mesh is currently undergoing high-intensity quantum realignment. Please retry your query."
       }]);
+    } finally {
       setLoading(false);
-    }, 1500);
+    }
   };
 
   return (

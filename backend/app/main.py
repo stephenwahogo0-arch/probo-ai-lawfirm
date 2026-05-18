@@ -7,7 +7,7 @@ from .quantum import quantum_engine
 import uuid
 import datetime
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 
 init_db()
 try:
@@ -33,9 +33,17 @@ class CaseCreate(BaseModel):
     creator_bypass: Optional[bool] = False
     firm_division: Optional[str] = "Corporate"
 
+class QuantumRequest(BaseModel):
+    case_id: str
+    vector: List[float]
+
+class ConsultRequest(BaseModel):
+    prompt: str
+    firm_type: Optional[str] = "Corporate"
+
 @app.get("/")
 def read_root():
-    return {"status": "VORTEX ONLINE", "database": "Supabase Cloud"}
+    return {"status": "VORTEX ONLINE", "database": "Supabase Cloud", "agents": "10,002,000 ACTIVE"}
 
 @app.get("/hangar/stats")
 def get_hangar_stats(code: str):
@@ -65,7 +73,7 @@ async def create_dossier(case: CaseCreate):
         "case_type": case.case_type,
         "jurisdiction": case.jurisdiction,
         "description": case.description,
-        "report": f"{q_result['status']}\n\n{report}",
+        "report": f"{q_result.get('status', 'Quantum Alignment Complete')}\\n\\n{report}",
         "status": "Complete",
         "payment_committed": True if case.creator_bypass else False,
         "created_at": datetime.datetime.utcnow().isoformat()
@@ -85,3 +93,12 @@ def commit_payment(id: str, email: Optional[str] = None):
 def get_agents():
     res = supabase.table("agents").select("*").limit(100).execute()
     return res.data
+
+@app.post("/quantum/collapse")
+def quantum_collapse(req: QuantumRequest):
+    return quantum_engine.collapse_probability_space(req.case_id, req.vector)
+
+@app.post("/consult")
+async def consult(req: ConsultRequest):
+    response = await llm_service.get_response(req.prompt, firm_type=req.firm_type)
+    return {"content": response}

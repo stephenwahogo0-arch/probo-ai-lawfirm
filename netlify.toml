@@ -2,7 +2,18 @@
   command = "npm run build"
   publish = "dist"
 
+[functions]
+  directory = "api"
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/index/:splat"
+  status = 200
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+
+[context.production.environment]
+  PYTHON_VERSION = "3.12"

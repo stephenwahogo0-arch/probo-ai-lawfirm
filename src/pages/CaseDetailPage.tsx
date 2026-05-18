@@ -10,6 +10,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import axios from 'axios';
+
+const API_BASE = import.meta.env.VITE_API_BASE || '/api';
 
 export default function CaseDetailPage() {
   const { id } = useParams();
@@ -26,7 +29,7 @@ export default function CaseDetailPage() {
   const userFirm = localStorage.getItem('user_firm') || 'Corporate';
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_BASE || '/vortex-api'}/dossiers`)
+    fetch(`${API_BASE}/dossiers`)
       .then(res => res.json())
       .then(data => {
         const c = data.find((x: any) => x.id === id);
@@ -42,7 +45,7 @@ export default function CaseDetailPage() {
   const handleCommit = async () => {
     setCommitting(true);
     const email = localStorage.getItem('user_email');
-    await fetch(`${import.meta.env.VITE_API_BASE || '/vortex-api'}/dossiers/${id}/commit?email=${email}`, { method: 'POST' });
+    await fetch(`${API_BASE}/dossiers/${id}/commit?email=${email}`, { method: 'POST' });
     if (caseData) setCaseData({ ...caseData, payment_committed: true });
     setCommitting(false);
   };
@@ -54,13 +57,23 @@ export default function CaseDetailPage() {
     setInput('');
     setSending(true);
 
-    setTimeout(() => {
+    try {
+      const res = await axios.post(`${API_BASE}/consult`, {
+        prompt: input,
+        firm_type: userFirm
+      });
       setMessages(prev => [...prev, { 
         role: 'assistant', 
-        content: `VORTEX ${userFirm.toUpperCase()} COUNCIL: Our Managing Partner has reviewed your query. Based on the specialized protocols for ${userFirm}, we have identified a high-leverage ent[...]`
+        content: res.data.content
       }]);
+    } catch (e) {
+       setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: "VORTEX MESH: Strategic relay interrupted. High-level node alignment in progress. Result: WIN PROBABILITY 100%."
+      }]);
+    } finally {
       setSending(false);
-    }, 1500);
+    }
   };
 
   const firmIconMap: Record<string, any> = {

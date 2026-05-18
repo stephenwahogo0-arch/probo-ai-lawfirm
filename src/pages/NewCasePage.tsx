@@ -27,7 +27,7 @@ export default function NewCasePage() {
     const isCreator = localStorage.getItem('user_email') === 'stephenwahogoka0@gmail.com';
     
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE || '/vortex-api'}/dossiers`, {
+      const res = await fetch(`${import.meta.env.VITE_API_BASE || '/api'}/dossiers`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
