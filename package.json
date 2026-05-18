@@ -14,6 +14,8 @@
     "@google/generative-ai": "^0.24.1",
     "@supabase/supabase-js": "^2.105.4",
     "@tailwindcss/vite": "^4.3.0",
+    "@vercel/node": "^5.8.2",
+    "ai": "^6.0.184",
     "axios": "^1.16.0",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
