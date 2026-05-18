@@ -68,8 +68,9 @@ export default function LoginPage() {
           </div>
 
           <div className="space-y-4">
-            <label className="text-xs font-bold uppercase tracking-widest opacity-60">2. Secure Mobile Entry</label>
+            <label htmlFor="phone-input" className="text-xs font-bold uppercase tracking-widest opacity-60">2. Secure Mobile Entry</label>
             <input
+              id="phone-input"
               type="text"
               placeholder="+254 ..."
               className="w-full bg-muted/50 border border-border px-4 py-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all text-center text-xl font-mono tracking-widest"

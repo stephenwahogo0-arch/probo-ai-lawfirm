@@ -26,7 +26,7 @@ services:
     runtime: static
     repo: https://github.com/stephenwahogo0-arch/probo-ai-lawfirm
     branch: main
-    buildCommand: npm install && npm run build
+    buildCommand: pnpm install && pnpm build
     publishPath: dist
     envVars:
       - key: VITE_SUPABASE_URL
