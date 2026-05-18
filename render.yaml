@@ -9,29 +9,45 @@ services:
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: SUPABASE_URL
-        value: https://cxwqtjtaeaevpwegtwun.supabase.co
+        sync: false
       - key: SUPABASE_KEY
-        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN4d3F0anRhZWFldnB3ZWd0d3VuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0OTQ2NjcsImV4cCI6MjA5NDA3MDY2N30.Sieul34P9PO-ct0v7mzgFhS3aAnO73480k_FzC9a9b8
+        sync: false
       - key: IBM_QUANTUM_TOKEN
-        value: 422F8eyiFO6KeJpr4HgTa51nKixmzLWz9UrdCgE4ssKg
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
       - key: OPENAI_API_KEY
-        value: "5795"
-      - key: ANTHROPIC_API_KEY
-        value: "5795"
-      - key: GEMINI_API_KEY
-        value: "5795"
+        sync: false
+      - key: AGENT_WALLET_SEED
+        sync: false
+      - key: ALCHEMY_RPC_URL
+        sync: false
+      - key: AGENT_PRIVATE_KEY
+        sync: false
+      - key: WORKPROTOCOL_API_URL
+        sync: false
+      - key: WORKPROTOCOL_API_KEY
+        sync: false
+      - key: BITTENSOR_API_URL
+        sync: false
+      - key: BITTENSOR_API_KEY
+        sync: false
+      - key: BITTENSOR_WALLET_ADDRESS
+        sync: false
+      - key: AUTO_PAYOUT_ENABLED
+        value: "false"
 
   - type: web
     name: probo-law-frontend
     runtime: static
     repo: https://github.com/stephenwahogo0-arch/probo-ai-lawfirm
     branch: main
-    buildCommand: npm install && npm run build
+    buildCommand: npm ci && npm run build
     publishPath: dist
     envVars:
       - key: VITE_SUPABASE_URL
-        value: https://cxwqtjtaeaevpwegtwun.supabase.co
+        sync: false
       - key: VITE_SUPABASE_ANON_KEY
-        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN4d3F0anRhZWFldnB3ZWd0d3VuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0OTQ2NjcsImV4cCI6MjA5NDA3MDY2N30.Sieul34P9PO-ct0v7mzgFhS3aAnO73480k_FzC9a9b8
+        sync: false
       - key: VITE_API_BASE
         value: https://probo-law-backend.onrender.com
