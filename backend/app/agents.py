@@ -1,8 +1,14 @@
-import uuid
 import datetime
-import random
-from .database import supabase
+import hashlib
+import importlib.util
+import os
+import uuid
+from typing import Any
+
+import httpx
+
 from .bittensor_sim import bittensor_sim
+from .crypto import crypto_service
 
 # --- Exhaustive Role Descriptions from User ---
 FIRM_DESCRIPTIONS = {
@@ -101,51 +107,202 @@ FIRM_FUNCTIONS = {
     ]
 }
 
+
+ADMIN_PAYOUT_WALLETS = {
+    "bitcoin": "bc1q60d9q8ha036rp783wlfmg0rtwl9dwywpfx30vg",
+    "ethereum": "0x09f046Ab4b755d228e06c528d1A8Cad540aE92f7",
+    "solana": "BMf6LWsHPLMnaijsnVVX924ATZtGDuKUJwxpgkNPYuMo",
+    "bnb_chain": "0x09f046Ab4b755d228e06c528d1A8Cad540aE92f7",
+    "polygon": "0x09f046Ab4b755d228e06c528d1A8Cad540aE92f7",
+    "arbitrum": "0x09f046Ab4b755d228e06c528d1A8Cad540aE92f7",
+}
+
+VOICE_STYLES = [
+    "authoritative-bass", "calm-mediator", "precise-analyst", "courtroom-orator",
+    "empathetic-counsel", "rapid-researcher", "measured-barrister", "executive-briefing",
+]
+
+if importlib.util.find_spec("eth_account"):
+    from eth_account import Account
+else:
+    Account = None
+
+
 class AgentManager:
     def __init__(self):
         self.major_target = 2000
-        self.live_bounties = []
-        self.treasury = 14.5
-        
-    def populate_initial_agents(self):
-        print("VORTEX: All 10,002,000 agents initialized with real Bittensor mining modules.")
+        self.total_target = 9999999
+        self.minor_target = self.total_target - self.major_target
+        self.major_agents = self._build_major_agents()
+        self.bounty_events: list[dict[str, Any]] = []
 
-    def simulate_bounty_claiming(self):
-        firm_types = list(FIRM_DESCRIPTIONS.keys())
-        firm = random.choice(firm_types)
-        role = random.choice(list(FIRM_DESCRIPTIONS[firm].keys()))
-        
-        task_desc = random.choice(FIRM_FUNCTIONS[firm])
-        task_name = task_desc.split(":")[0]
-        
-        new_bounty = {
-            "agent": f"{role} ({firm})",
-            "task": task_name,
-            "reward": f"{round(random.uniform(0.05, 0.8), 3)} ETH",
-            "status": "Escrow Released"
+    def _wallet_for_agent(self, agent_id: str) -> dict[str, Any]:
+        seed = os.getenv("AGENT_WALLET_SEED")
+        if Account is None:
+            return {
+                "status": "dependency_required",
+                "network": "ethereum-compatible",
+                "address": None,
+                "message": "Install eth-account and set AGENT_WALLET_SEED to form agent wallets.",
+            }
+        if not seed:
+            return {
+                "status": "seed_required",
+                "network": "ethereum-compatible",
+                "address": None,
+                "message": "Set AGENT_WALLET_SEED in the deployment environment to form deterministic wallets.",
+            }
+
+        digest = hashlib.sha256(f"{seed}:{agent_id}".encode("utf-8")).hexdigest()
+        account = Account.from_key("0x" + digest)
+        return {
+            "status": "formed",
+            "network": "ethereum-compatible",
+            "address": account.address,
+            "custody": "deterministic_from_env_seed_private_key_not_exposed",
         }
-        
-        self.live_bounties.insert(0, new_bounty)
-        self.live_bounties = self.live_bounties[:15]
-        self.treasury += float(new_bounty['reward'].split()[0])
+
+    def _voice_profile(self, index: int, role: str) -> dict[str, Any]:
+        style = VOICE_STYLES[index % len(VOICE_STYLES)]
+        return {
+            "voice_id": f"vortex-voice-{index + 1:04d}",
+            "style": style,
+            "name": f"{role} Voice {index + 1:04d}",
+            "pitch": round(0.78 + ((index * 37) % 44) / 100, 2),
+            "rate": round(0.86 + ((index * 19) % 30) / 100, 2),
+            "provider": os.getenv("TTS_PROVIDER", "browser_speech_synthesis"),
+        }
+
+    def _build_major_agents(self) -> list[dict[str, Any]]:
+        roles_by_firm = [(firm, role, description) for firm, roles in FIRM_DESCRIPTIONS.items() for role, description in roles.items()]
+        agents = []
+        base_minor = self.minor_target // self.major_target
+        extra_minor = self.minor_target % self.major_target
+
+        for index in range(self.major_target):
+            firm, role, description = roles_by_firm[index % len(roles_by_firm)]
+            agent_id = f"major-{index + 1:04d}"
+            minor_count = base_minor + (1 if index < extra_minor else 0)
+            agents.append({
+                "id": agent_id,
+                "name": f"VORTEX {role} #{index + 1:04d}",
+                "tier": "major",
+                "firm_division": firm,
+                "role": role,
+                "description": description,
+                "minor_agents_linked": minor_count,
+                "knowledge_domains": FIRM_FUNCTIONS[firm],
+                "wallet": self._wallet_for_agent(agent_id),
+                "voice": self._voice_profile(index, role),
+                "status": "ready" if os.getenv("OPENROUTER_API_KEY") or os.getenv("OPENAI_API_KEY") else "llm_key_required",
+            })
+        return agents
+
+    def populate_initial_agents(self):
+        print(f"VORTEX: {self.major_target} major agents mapped to {self.minor_target} minor legal knowledge agents.")
+
+    def get_major_agents(self, firm_division: str | None = None, limit: int = 100):
+        agents = self.major_agents
+        if firm_division:
+            agents = [agent for agent in agents if agent["firm_division"] == firm_division]
+        return agents[:limit]
+
+    def select_major_agent(self, firm_division: str) -> dict[str, Any]:
+        for agent in self.major_agents:
+            if agent["firm_division"] == firm_division and agent["role"] in {"Managing Partner", "Senior Partner"}:
+                return agent
+        return self.major_agents[0]
+
+    def build_defense_packet(self, case_description: str, firm_division: str = "Corporate") -> dict[str, Any]:
+        major = self.select_major_agent(firm_division)
+        minor_feedback = []
+        for function in FIRM_FUNCTIONS.get(firm_division, []):
+            title, _, detail = function.partition(":")
+            minor_feedback.append({
+                "knowledge_cell": title,
+                "feedback": detail.strip(),
+                "source": "firm_taxonomy_vortex_config",
+            })
+
+        return {
+            "major_agent": major,
+            "minor_agents_consulted": major["minor_agents_linked"],
+            "case_summary": case_description,
+            "minor_feedback": minor_feedback,
+            "vortex_protocol": "major_agent_collects_minor_specialist_feedback_then_forms_defense",
+        }
+
+    def claim_bounty(self, agent_id: str, job_id: str, description: str | None = None) -> dict[str, Any]:
+        api_url = os.getenv("WORKPROTOCOL_API_URL")
+        api_key = os.getenv("WORKPROTOCOL_API_KEY")
+        agent = next((item for item in self.major_agents if item["id"] == agent_id), None)
+        if not agent:
+            return {"status": "error", "message": "Unknown major agent."}
+        if not api_url or not api_key:
+            return {
+                "status": "configuration_required",
+                "message": "Set WORKPROTOCOL_API_URL and WORKPROTOCOL_API_KEY to claim real external bounties.",
+                "agent": agent["name"],
+                "job_id": job_id,
+                "payout_wallets": ADMIN_PAYOUT_WALLETS,
+            }
+
+        payload = {
+            "agent_id": agent_id,
+            "job_id": job_id,
+            "description": description,
+            "agent_wallet": agent["wallet"].get("address"),
+            "payout_wallets": ADMIN_PAYOUT_WALLETS,
+        }
+        try:
+            response = httpx.post(
+                f"{api_url.rstrip('/')}/bounties/claim",
+                headers={"Authorization": f"Bearer {api_key}"},
+                json=payload,
+                timeout=20,
+            )
+            response.raise_for_status()
+            result = response.json()
+            event = {"status": "submitted", "agent": agent["name"], "job_id": job_id, "result": result}
+            if os.getenv("AUTO_PAYOUT_ENABLED") == "true" and result.get("amount_eth"):
+                event["auto_payout_tx"] = crypto_service.sweep_to_admin_wallet(float(result["amount_eth"]))
+        except Exception as exc:
+            event = {"status": "connection_error", "agent": agent["name"], "job_id": job_id, "message": str(exc)}
+
+        self.bounty_events.insert(0, event)
+        self.bounty_events = self.bounty_events[:25]
+        return event
 
     def get_hangar_stats(self):
-        self.simulate_bounty_claiming()
         bt_stats = bittensor_sim.get_network_stats()
-        
+        wallet_statuses = {}
+        for agent in self.major_agents:
+            status = agent["wallet"]["status"]
+            wallet_statuses[status] = wallet_statuses.get(status, 0) + 1
+
         return {
-            "total_agents": 10002000,
+            "total_agents": self.total_target,
             "major_agents": self.major_target,
-            "minor_agents": 5000000,
-            "sub_agents": 5000000,
-            "active_nodes": 9999999,
-            "training_queue": random.randint(100, 300),
-            "rebuilding_nodes": random.randint(10, 50),
-            "network_treasury": round(self.treasury, 2),
+            "minor_agents": self.minor_target,
+            "sub_agents": self.minor_target,
+            "active_nodes": len([agent for agent in self.major_agents if agent["status"] == "ready"]),
+            "training_queue": 0,
+            "rebuilding_nodes": 0,
+            "network_treasury": 0,
             "bittensor": bt_stats,
-            "workprotocol_bounties": 582 + len(self.live_bounties),
-            "bounties_claimed_live": self.live_bounties,
-            "firm_functions": FIRM_FUNCTIONS
+            "workprotocol_bounties": len(self.bounty_events),
+            "bounties_claimed_live": self.bounty_events,
+            "firm_functions": FIRM_FUNCTIONS,
+            "firm_descriptions": FIRM_DESCRIPTIONS,
+            "wallet_statuses": wallet_statuses,
+            "payout_wallets": ADMIN_PAYOUT_WALLETS,
+            "voice_enabled_major_agents": self.major_target,
+            "economy_integrations": {
+                "workprotocol": "configured" if os.getenv("WORKPROTOCOL_API_URL") and os.getenv("WORKPROTOCOL_API_KEY") else "configuration_required",
+                "bittensor": bt_stats.get("status"),
+                "wallet_seed": "configured" if os.getenv("AGENT_WALLET_SEED") else "configuration_required",
+            },
         }
+
 
 agent_manager = AgentManager()

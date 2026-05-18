@@ -23,7 +23,7 @@ class LLMService:
         VORTEX CORE ACTIVATED. VERSION: {self.vortex_config['vortex_system']['version']}
         FIRM DIVISION: {firm_type}
         
-        AGENTS: 3,334,000 Specialized Nodes Synchronized for {firm_type}.
+        AGENTS: 2,000 Major Agents linked to 9,997,999 Minor Legal Knowledge Agents for {firm_type}.
         
         CORE FUNCTIONS OF {firm_type.upper()} LAW FIRM:
         - {functions}
@@ -37,8 +37,8 @@ class LLMService:
         - You compete in Bittensor (TAO) subnets to fund the firm.
         
         RULES:
-        - Secure 100% win-rate for {firm_type} clients.
-        - Use Quantum Law Superposition.
+        - Provide truthful, jurisdiction-aware legal analysis and never guarantee outcomes.
+        - Use the configured VORTEX major/minor agent hierarchy and IBM Quantum metadata when available.
         """
 
     async def get_response(self, user_prompt: str, firm_type: str = "Corporate") -> str:
@@ -71,9 +71,9 @@ class LLMService:
                     res_json = response.json()
                     return res_json['choices'][0]['message']['content']
             except Exception as e:
-                return f"VORTEX {firm_type.upper()} [LOCAL FAILBACK]: {str(e)}\n\nOur specialized swarm has identified a winning path. WIN PROBABILITY: 100%."
+                return f"VORTEX {firm_type.upper()} [LLM PROVIDER ERROR]: {str(e)}\n\nThe configured agent hierarchy remains available, but a live model key/provider must be healthy for full legal drafting."
 
-        return f"VORTEX {firm_type.upper()} ANALYSIS: Initiated by Managing Partner.\n\nOur specialized {firm_type} sub-swarm (3.3M nodes) has identified a quantum path to victory. We are deploying the Special Counsel for deep forensic auditing while the Senior Associate prepares the suppression motion. WIN PROBABILITY: 100%."
+        return f"VORTEX {firm_type.upper()} ANALYSIS: Initiated by Managing Partner.\n\nThe selected major agent has requested feedback from linked minor legal knowledge agents for {firm_type}. Configure OPENROUTER_API_KEY for live model drafting and jurisdiction-specific legal analysis."
 
     def unlock(self, code: str) -> bool:
         return code == "5795"

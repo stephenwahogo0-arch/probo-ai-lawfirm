@@ -10,6 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { orchestrator } from '@/services/AgentOrchestrator';
+import { voiceService } from '@/services/VoiceService';
 
 export default function CaseDetailPage() {
   const { id } = useParams();
@@ -50,17 +52,31 @@ export default function CaseDetailPage() {
   const handleSend = async () => {
     if (!input.trim()) return;
     const userMsg = { role: 'user', content: input };
-    setMessages([...messages, userMsg]);
+    setMessages(prev => [...prev, userMsg]);
     setInput('');
     setSending(true);
 
-    setTimeout(() => {
-      setMessages(prev => [...prev, { 
-        role: 'assistant', 
-        content: `VORTEX ${userFirm.toUpperCase()} COUNCIL: Our Managing Partner has reviewed your query. Based on the specialized protocols for ${userFirm}, we have identified a high-leverage ent[...]`
-      }]);
+    try {
+      const packet = await orchestrator.buildDefensePacket({
+        title: caseData?.title || 'Live consultation',
+        case_type: caseData?.case_type || userFirm,
+        jurisdiction: caseData?.jurisdiction || 'User selected jurisdiction',
+        description: input,
+        firm_division: userFirm,
+      });
+      const feedback = packet.minor_feedback
+        .map((item: any) => `${item.knowledge_cell}: ${item.feedback}`)
+        .join(' ');
+      const response = `${packet.major_agent.name} consulted ${packet.minor_agents_consulted.toLocaleString()} linked minor legal knowledge agents. ${feedback}`;
+      setMessages(prev => [...prev, { role: 'assistant', content: response, voice: packet.major_agent.voice }]);
+      voiceService.speak(response, packet.major_agent.voice);
+    } catch (err) {
+      const response = `VORTEX ${userFirm.toUpperCase()} COUNCIL: The live defense-packet endpoint is unavailable. Please retry after the API is online.`;
+      console.error(err);
+      setMessages(prev => [...prev, { role: 'assistant', content: response }]);
+    } finally {
       setSending(false);
-    }, 1500);
+    }
   };
 
   const firmIconMap: Record<string, any> = {
@@ -90,7 +106,7 @@ export default function CaseDetailPage() {
           <h1 className="text-4xl font-display font-bold tracking-tight">{caseData.title}</h1>
           <p className="text-muted-foreground font-mono text-[10px] uppercase tracking-[0.2em] flex items-center gap-2">
             Vector ID: {caseData.id} <span className="opacity-30">|</span> 
-            <Zap className="h-3 w-3 text-primary" /> Mesh: {userFirm} 3.3M
+            <Zap className="h-3 w-3 text-primary" /> Mesh: {userFirm} 9,999,999
           </p>
         </div>
         <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
@@ -120,8 +136,13 @@ export default function CaseDetailPage() {
                    <div className={cn("w-8 h-8 rounded-full flex items-center justify-center shrink-0 border", m.role === 'user' ? "bg-secondary border-secondary-foreground/20" : "bg-primary/10")}>
                       {m.role === 'user' ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4 text-primary" />}
                    </div>
-                   <div className={cn("p-4 rounded-2xl text-sm shadow-sm", m.role === 'user' ? "bg-primary text-primary-foreground font-medium" : "bg-muted border border-border text-foreground")}>
-                      {m.content}
+                   <div className={cn("p-4 rounded-2xl text-sm shadow-sm space-y-2", m.role === 'user' ? "bg-primary text-primary-foreground font-medium" : "bg-muted border border-border text-foreground")}>
+                      <div>{m.content}</div>
+                      {m.role !== 'user' && (
+                        <Button type="button" variant="outline" size="sm" className="h-7 text-[10px]" onClick={() => voiceService.speak(m.content, m.voice)}>
+                          Speak with Major Agent Voice
+                        </Button>
+                      )}
                    </div>
                 </div>
               ))}
@@ -163,7 +184,7 @@ export default function CaseDetailPage() {
               </CardHeader>
               <CardContent className="space-y-6">
                  <p className="text-sm leading-relaxed text-muted-foreground font-medium">
-                    To unlock the full {userFirm} Strategic Report and mobilize 3,334,000 agents, a **Victory Commitment** of 0 is required.
+                    To unlock the full {userFirm} Strategic Report and mobilize 9,999,999 agents, a **Victory Commitment** of 0 is required.
                  </p>
                  <div className="p-6 bg-background border border-border rounded-2xl space-y-4 shadow-xl border-t-4 border-t-primary">
                     <div className="flex justify-between items-center">
@@ -185,7 +206,7 @@ export default function CaseDetailPage() {
                  </Button>
                  <div className="text-[9px] text-center opacity-40 uppercase tracking-widest space-y-1">
                    <p>* Non-refundable for malicious intent.</p>
-                   <p>* VORTEX Mesh ensures 100% legal defensibility.</p>
+                   <p>* VORTEX Mesh provides research support, not guaranteed legal outcomes.</p>
                  </div>
               </CardContent>
            </Card>

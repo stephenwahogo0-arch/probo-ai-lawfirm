@@ -1,12 +1,13 @@
+import importlib.util
 import os
 from copy import deepcopy
 from typing import Any, Optional
 
 from dotenv import load_dotenv
 
-try:
+if importlib.util.find_spec("supabase"):
     from supabase import Client, create_client
-except ImportError:
+else:
     Client = Any
     create_client = None
 

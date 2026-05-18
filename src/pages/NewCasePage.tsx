@@ -58,7 +58,7 @@ export default function NewCasePage() {
         </div>
         <h1 className="text-4xl font-display font-bold">{userFirm} Intake</h1>
         <p className="text-muted-foreground uppercase tracking-widest text-[10px] font-bold">
-           Initializing {userFirm === 'Corporate' ? '3.3M' : '3.3M'} nodes for specialized legal vectoring
+           Initializing 9,999,999 nodes for specialized legal vectoring
         </p>
       </div>
 

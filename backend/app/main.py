@@ -40,6 +40,12 @@ class CaseCreate(BaseModel):
     creator_bypass: Optional[bool] = False
     firm_division: Optional[str] = "Corporate"
 
+
+class BountyClaimRequest(BaseModel):
+    agent_id: str
+    job_id: str
+    description: Optional[str] = None
+
 @app.get("/")
 def read_root():
     return {"status": "VORTEX ONLINE", "database": "Supabase Cloud"}
@@ -61,8 +67,10 @@ async def create_dossier(case: CaseCreate):
     
     q_result = quantum_engine.collapse_probability_space(dossier_id, [1, 0])
     
+    defense_packet = agent_manager.build_defense_packet(case.description, firm_division=case.firm_division or "Corporate")
+
     report = await llm_service.get_response(
-        f"Generate full strategic legal report for: {case.description}",
+        f"Generate full strategic legal report using this VORTEX defense packet: {defense_packet}",
         firm_type=case.firm_division
     )
     
@@ -72,7 +80,7 @@ async def create_dossier(case: CaseCreate):
         "case_type": case.case_type,
         "jurisdiction": case.jurisdiction,
         "description": case.description,
-        "report": f"{q_result['status']}\n\n{report}",
+        "report": f"{q_result['status']}\n\nMajor Agent: {defense_packet['major_agent']['name']}\nMinor Agents Consulted: {defense_packet['minor_agents_consulted']}\n\n{report}",
         "status": "Complete",
         "payment_committed": True if case.creator_bypass else False,
         "created_at": datetime.datetime.utcnow().isoformat()
@@ -89,6 +97,17 @@ def commit_payment(id: str, email: Optional[str] = None):
     return res.data
 
 @app.get("/agents")
-def get_agents():
-    res = supabase.table("agents").select("*").limit(100).execute()
-    return res.data
+def get_agents(firm_division: Optional[str] = None, limit: int = 100):
+    return agent_manager.get_major_agents(firm_division=firm_division, limit=limit)
+
+
+@app.post("/agents/defense-packet")
+def build_defense_packet(case: CaseCreate):
+    return agent_manager.build_defense_packet(case.description, firm_division=case.firm_division or "Corporate")
+
+
+@app.post("/agents/bounties/claim")
+def claim_bounty(request: BountyClaimRequest, code: str):
+    if code != "5795":
+        raise HTTPException(status_code=403, detail="Unauthorized")
+    return agent_manager.claim_bounty(request.agent_id, request.job_id, request.description)

@@ -1,10 +1,10 @@
-
+import importlib.util
 import os
 
-try:
+if importlib.util.find_spec("qiskit") and importlib.util.find_spec("qiskit_ibm_runtime"):
     from qiskit import QuantumCircuit
     from qiskit_ibm_runtime import QiskitRuntimeService, SamplerV2 as Sampler
-except ImportError:
+else:
     QuantumCircuit = None
     QiskitRuntimeService = None
     Sampler = None
@@ -16,19 +16,19 @@ class QuantumLawEngine:
     def __init__(self):
         self.api_key = os.getenv("IBM_QUANTUM_TOKEN")
         if QiskitRuntimeService is None or not self.api_key:
-            print("Quantum Service Warning: qiskit or IBM_QUANTUM_TOKEN missing. Falling back to simulator mode.")
+            print("Quantum Service Warning: qiskit or IBM_QUANTUM_TOKEN missing. Hardware execution disabled until configured.")
             self.service = None
             return
 
         try:
             self.service = QiskitRuntimeService(channel="ibm_quantum", token=self.api_key)
         except Exception as e:
-            print(f"Quantum Service Warning: {e}. Falling back to simulator mode.")
+            print(f"Quantum Service Warning: {e}. Hardware execution disabled until configured.")
             self.service = None
 
     def collapse_probability_space(self, case_id: str, data_vector: list):
         if not self.service or QuantumCircuit is None or Sampler is None:
-            return {"status": "Simulated Collapse", "probability": 0.9999}
+            return {"status": "Quantum Hardware Not Configured", "probability": None}
 
         qc = QuantumCircuit(2)
         qc.h(0)
@@ -41,6 +41,6 @@ class QuantumLawEngine:
             job = sampler.run([qc])
             return {"status": "Quantum Collapse Initiated", "job_id": job.job_id(), "backend": backend.name}
         except Exception as e:
-            return {"status": "Quantum Job Failed", "error": str(e), "fallback": "Deterministic Logic"}
+            return {"status": "Quantum Job Failed", "error": str(e), "fallback": "hardware_job_not_submitted"}
 
 quantum_engine = QuantumLawEngine()

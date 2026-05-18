@@ -1,52 +1,72 @@
-import random
-import datetime
+import os
+from typing import Any
 
-class BittensorSubnet:
-    def __init__(self, netuid: int, name: str, daily_emission: float):
-        self.netuid = netuid
-        self.name = name
-        self.daily_emission = daily_emission
-        self.total_stake = random.uniform(100000, 500000)
-        self.firm_stake = random.uniform(500, 2000)
-        self.active_agents = random.randint(50, 200)
+import httpx
 
-    def calculate_daily_yield(self) -> float:
-        # Yield based on stake weight + performance factor
-        performance = random.uniform(0.8, 1.2)
-        share = self.firm_stake / self.total_stake
-        return self.daily_emission * share * performance
+
+BITTENSOR_SUBNETS = [
+    {"netuid": 1, "name": "Text Prompting"},
+    {"netuid": 2, "name": "Data Scraping"},
+    {"netuid": 12, "name": "Financial Reasoning"},
+    {"netuid": 18, "name": "Cortex Intelligence"},
+    {"netuid": 24, "name": "Quantum Proofing"},
+]
+
 
 class BittensorNetwork:
     def __init__(self):
-        self.subnets = [
-            BittensorSubnet(1, "Text Prompting", 50.0),
-            BittensorSubnet(2, "Data Scraping", 30.0),
-            BittensorSubnet(12, "Financial Reasoning", 45.0),
-            BittensorSubnet(18, "Cortex Intelligence", 60.0),
-            BittensorSubnet(24, "Quantum Proofing", 80.0)
-        ]
-        self.start_date = datetime.datetime(2026, 1, 1)
-        self.total_tao_earned = 842.50
+        self.api_url = os.getenv("BITTENSOR_API_URL")
+        self.api_key = os.getenv("BITTENSOR_API_KEY")
+        self.wallet_address = os.getenv("BITTENSOR_WALLET_ADDRESS")
 
-    def get_network_stats(self):
-        daily_total = 0
-        details = []
-        for sn in self.subnets:
-            dy = sn.calculate_daily_yield()
-            daily_total += dy
-            details.append({
-                "netuid": sn.netuid,
-                "name": sn.name,
-                "stake": round(sn.firm_stake, 2),
-                "yield_24h": round(dy, 4),
-                "agents": sn.active_agents
-            })
-        
-        self.total_tao_earned += daily_total / 24 # Increment slightly per call
+    def _configured_headers(self) -> dict[str, str]:
+        if not self.api_key:
+            return {}
+        return {"Authorization": f"Bearer {self.api_key}"}
+
+    def get_network_stats(self) -> dict[str, Any]:
+        if not self.api_url:
+            return {
+                "status": "configuration_required",
+                "message": "Set BITTENSOR_API_URL, BITTENSOR_API_KEY, and BITTENSOR_WALLET_ADDRESS to enable live TAO earnings.",
+                "wallet_address": self.wallet_address,
+                "total_earned": 0,
+                "daily_emission": 0,
+                "subnets": [
+                    {**subnet, "stake": 0, "yield_24h": 0, "agents": 0, "status": "not_connected"}
+                    for subnet in BITTENSOR_SUBNETS
+                ],
+            }
+
+        try:
+            response = httpx.get(
+                self.api_url,
+                headers=self._configured_headers(),
+                params={"wallet": self.wallet_address} if self.wallet_address else None,
+                timeout=10,
+            )
+            response.raise_for_status()
+            data = response.json()
+        except Exception as exc:
+            return {
+                "status": "connection_error",
+                "message": str(exc),
+                "wallet_address": self.wallet_address,
+                "total_earned": 0,
+                "daily_emission": 0,
+                "subnets": [
+                    {**subnet, "stake": 0, "yield_24h": 0, "agents": 0, "status": "unavailable"}
+                    for subnet in BITTENSOR_SUBNETS
+                ],
+            }
+
         return {
-            "total_earned": round(self.total_tao_earned, 2),
-            "daily_emission": round(daily_total, 2),
-            "subnets": details
+            "status": "live",
+            "wallet_address": self.wallet_address,
+            "total_earned": data.get("total_earned", 0),
+            "daily_emission": data.get("daily_emission", 0),
+            "subnets": data.get("subnets", []),
         }
+
 
 bittensor_sim = BittensorNetwork()

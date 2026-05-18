@@ -1,0 +1,31 @@
+# Never commit real secrets. Set these in Vercel/Render/Netlify dashboards.
+SUPABASE_URL=
+SUPABASE_KEY=
+VITE_SUPABASE_URL=
+VITE_SUPABASE_ANON_KEY=
+VITE_API_BASE=/vortex-api
+
+# AI orchestration
+OPENROUTER_API_KEY=
+OPENAI_API_KEY=
+
+# 2,000 major agent deterministic wallet formation.
+# Use a long random secret; changing it changes every derived agent wallet.
+AGENT_WALLET_SEED=
+ALCHEMY_RPC_URL=
+AGENT_PRIVATE_KEY=
+
+# Real quantum hardware access; paste your IBM token in the deployment dashboard only.
+IBM_QUANTUM_TOKEN=
+
+# Real economy integrations; no fake earnings are generated without these.
+WORKPROTOCOL_API_URL=
+WORKPROTOCOL_API_KEY=
+BITTENSOR_API_URL=
+BITTENSOR_API_KEY=
+BITTENSOR_WALLET_ADDRESS=
+
+# Optional TTS provider marker; browser speech synthesis works without a server key.
+TTS_PROVIDER=browser_speech_synthesis
+# If true, successful WorkProtocol responses containing amount_eth are swept to the configured admin EVM wallet.
+AUTO_PAYOUT_ENABLED=false

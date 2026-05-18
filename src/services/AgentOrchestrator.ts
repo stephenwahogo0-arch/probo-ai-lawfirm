@@ -1,15 +1,24 @@
+import axios from 'axios';
 
-import { supabase } from '@/lib/supabase';
+const API_BASE = import.meta.env.VITE_API_BASE || '/vortex-api';
 
 export class AgentOrchestrator {
-  async getMajorAgents() {
-    const { data, error } = await supabase
-      .from('agents')
-      .select('*')
-      .limit(100);
-    
-    if (error) return [];
-    return data;
+  async getMajorAgents(firmDivision?: string) {
+    const res = await axios.get(`${API_BASE}/agents`, {
+      params: { firm_division: firmDivision, limit: 100 },
+    });
+    return res.data;
+  }
+
+  async buildDefensePacket(caseData: {
+    title: string;
+    case_type: string;
+    jurisdiction: string;
+    description: string;
+    firm_division?: string;
+  }) {
+    const res = await axios.post(`${API_BASE}/agents/defense-packet`, caseData);
+    return res.data;
   }
 }
 

@@ -3,25 +3,39 @@ import { MessageSquare, Bot, Send, Loader2, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { orchestrator } from '@/services/AgentOrchestrator';
+import { voiceService } from '@/services/VoiceService';
 
 export default function ConsultPage() {
   const [messages, setMessages] = useState<any[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!input.trim()) return;
-    setMessages([...messages, { role: 'user', content: input }]);
+    const prompt = input;
+    const userFirm = localStorage.getItem('user_firm') || 'Corporate';
+    setMessages(prev => [...prev, { role: 'user', content: prompt }]);
     setInput('');
     setLoading(true);
 
-    setTimeout(() => {
-      setMessages(prev => [...prev, { 
-        role: 'assistant', 
-        content: "The VORTEX Swarm has processed your query. Our consensus suggests that under the current democratic bedrock and rule of law, your position remains defensible through procedural i[...]"
-      }]);
+    try {
+      const packet = await orchestrator.buildDefensePacket({
+        title: 'Live consultation',
+        case_type: userFirm,
+        jurisdiction: 'User selected jurisdiction',
+        description: prompt,
+        firm_division: userFirm,
+      });
+      const response = `${packet.major_agent.name} activated the VORTEX defense protocol and consulted ${packet.minor_agents_consulted.toLocaleString()} minor legal knowledge agents. ${packet.minor_feedback.map((item: any) => `${item.knowledge_cell}: ${item.feedback}`).join(' ')}`;
+      setMessages(prev => [...prev, { role: 'assistant', content: response, voice: packet.major_agent.voice }]);
+      voiceService.speak(response, packet.major_agent.voice);
+    } catch (err) {
+      console.error(err);
+      setMessages(prev => [...prev, { role: 'assistant', content: 'The live VORTEX agent endpoint is unavailable. Please retry after the backend deployment is online.' }]);
+    } finally {
       setLoading(false);
-    }, 1500);
+    }
   };
 
   return (
@@ -30,7 +44,7 @@ export default function ConsultPage() {
         <MessageSquare className="h-8 w-8 text-primary" />
         <div>
           <h1 className="text-2xl font-display font-bold">Swarm Consultation</h1>
-          <p className="text-xs text-muted-foreground uppercase tracking-widest font-bold">10,002,000 Agents Connected</p>
+          <p className="text-xs text-muted-foreground uppercase tracking-widest font-bold">9,999,999 Agents Connected</p>
         </div>
       </div>
 
@@ -47,8 +61,13 @@ export default function ConsultPage() {
               <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 border ${m.role === 'user' ? 'bg-secondary' : 'bg-primary/10'}`}>
                 {m.role === 'user' ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4 text-primary" />}
               </div>
-              <div className={`p-4 rounded-2xl text-sm ${m.role === 'user' ? 'bg-primary text-primary-foreground shadow-lg' : 'bg-muted border border-border'}`}>
-                {m.content}
+              <div className={`p-4 rounded-2xl text-sm space-y-2 ${m.role === 'user' ? 'bg-primary text-primary-foreground shadow-lg' : 'bg-muted border border-border'}`}>
+                <div>{m.content}</div>
+                {m.role !== 'user' && (
+                  <Button type="button" variant="outline" size="sm" className="h-7 text-[10px]" onClick={() => voiceService.speak(m.content, m.voice)}>
+                    Speak with Major Agent Voice
+                  </Button>
+                )}
               </div>
             </div>
           ))}

@@ -50,7 +50,7 @@ export const HangarPage: React.FC = () => {
             <h2 className="font-bold text-sm uppercase tracking-tighter">Live Swarm</h2>
           </div>
           <p className="text-2xl font-display font-bold">{stats.total_agents.toLocaleString()}</p>
-          <p className="text-[10px] opacity-60">ACROSS 3 SPECIALIZED FIRMS</p>
+          <p className="text-[10px] opacity-60">2,000 MAJOR · {stats.minor_agents.toLocaleString()} MINOR</p>
         </Card>
 
         <Card className="p-4 bg-secondary/5 border-secondary/20">
@@ -68,7 +68,7 @@ export const HangarPage: React.FC = () => {
             <h2 className="font-bold text-sm uppercase tracking-tighter">Bounties</h2>
           </div>
           <p className="text-2xl font-display font-bold">{stats.workprotocol_bounties}</p>
-          <p className="text-[10px] opacity-60">WORKPROTOCOL REAL-TIME</p>
+          <p className="text-[10px] opacity-60">{stats.economy_integrations.workprotocol}</p>
         </Card>
 
         <Card className="p-4 bg-muted/30 border-border/50">
@@ -76,8 +76,8 @@ export const HangarPage: React.FC = () => {
             <Globe className="h-5 w-5 text-blue-400" />
             <h2 className="font-bold text-sm uppercase tracking-tighter">Economy</h2>
           </div>
-          <p className="text-2xl font-display font-bold">VIRTUALS</p>
-          <p className="text-[10px] opacity-60">TOKENIZED LAUNCHPAD ACTIVE</p>
+          <p className="text-2xl font-display font-bold">{stats.voice_enabled_major_agents}</p>
+          <p className="text-[10px] opacity-60">UNIQUE MAJOR AGENT VOICES</p>
         </Card>
       </div>
 
@@ -85,7 +85,7 @@ export const HangarPage: React.FC = () => {
         <div className="lg:col-span-2 space-y-6">
            <Card className="p-6">
               <h3 className="text-sm font-bold uppercase tracking-widest opacity-50 flex items-center gap-2 mb-6">
-                <Server className="h-4 w-4" /> Bittensor Subnet Operations
+                <Server className="h-4 w-4" /> Bittensor Subnet Operations — {stats.bittensor.status}
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                  {stats.bittensor.subnets.map((sn: any) => (
@@ -114,6 +114,11 @@ export const HangarPage: React.FC = () => {
                 <Activity className="h-4 w-4" /> Live Autonomous Bounty Stream
               </h3>
               <div className="space-y-3">
+                 {stats.bounties_claimed_live.length === 0 && (
+                    <div className="p-4 bg-muted/50 rounded-xl border border-border/50 text-xs opacity-70">
+                      No fake bounty events are generated. Configure WORKPROTOCOL_API_URL and WORKPROTOCOL_API_KEY, then submit real claims from this creator hangar.
+                    </div>
+                 )}
                  {stats.bounties_claimed_live.map((b: any, i: number) => (
                     <div key={i} className="flex items-center justify-between p-4 bg-muted/50 rounded-xl border border-border/50">
                        <div className="flex items-center gap-4">
@@ -122,11 +127,11 @@ export const HangarPage: React.FC = () => {
                           </div>
                           <div>
                              <p className="text-xs font-bold">{b.agent}</p>
-                             <p className="text-[10px] opacity-60">{b.task}</p>
+                             <p className="text-[10px] opacity-60">{b.job_id || b.task || b.message}</p>
                           </div>
                        </div>
                        <div className="text-right">
-                          <p className="text-xs font-mono font-bold text-green-500">{b.reward}</p>
+                          <p className="text-xs font-mono font-bold text-green-500">{b.result?.amount_eth ? `${b.result.amount_eth} ETH` : b.auto_payout_tx || b.reward || b.status}</p>
                           <p className="text-[9px] uppercase font-bold opacity-40">{b.status}</p>
                        </div>
                     </div>
@@ -152,13 +157,13 @@ export const HangarPage: React.FC = () => {
             <div className="space-y-4">
                <div className="text-xs">
                   <p className="font-bold opacity-60 uppercase mb-1">Active Builder Module</p>
-                  <p className="leading-relaxed">Rebuilding distracted nodes... {stats.rebuilding_nodes} nodes in cycle.</p>
+                  <p className="leading-relaxed">Wallet formation: {Object.entries(stats.wallet_statuses).map(([key, value]) => `${key}: ${value}`).join(' · ')}</p>
                </div>
                <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
                   <div className="h-full bg-primary" style={{ width: '75%' }} />
                </div>
                <Button className="w-full text-[10px] h-8 font-bold uppercase tracking-widest">
-                  Emergency Swarm Sync
+                  Verify 2,000 Major Agents
                </Button>
             </div>
           </Card>

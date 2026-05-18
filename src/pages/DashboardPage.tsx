@@ -45,7 +45,7 @@ export default function DashboardPage() {
            </div>
            <div>
               <h1 className="text-3xl font-display font-bold">{userFirm} Hub</h1>
-              <p className="text-muted-foreground text-sm uppercase tracking-widest font-bold">Synchronized Swarm: 3,334,000 Agents</p>
+              <p className="text-muted-foreground text-sm uppercase tracking-widest font-bold">Synchronized Swarm: 9,999,999 Agents</p>
            </div>
         </div>
         <div className="flex gap-3">
@@ -153,7 +153,7 @@ export default function DashboardPage() {
               <div className="space-y-2">
                  <div className="flex justify-between text-[9px] font-bold uppercase tracking-tighter">
                     <span>Probability</span>
-                    <span className="text-primary">100%</span>
+                    <span className="text-primary">LIVE</span>
                  </div>
                  <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
                     <div className="h-full bg-primary w-full shadow-[0_0_10px_rgba(var(--primary),0.5)]" />

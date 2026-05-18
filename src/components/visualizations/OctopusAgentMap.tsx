@@ -137,7 +137,7 @@ export const OctopusAgentMap: React.FC = () => {
       </div>
       
       <div className="absolute bottom-4 right-4 text-[10px] text-muted-foreground uppercase tracking-widest bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10 font-bold">
-        VORTEX MESH — ON-CHAIN NODES: 10,002,000
+        VORTEX MESH — CONFIGURED CAPACITY: 9,999,999
       </div>
     </div>
   );
