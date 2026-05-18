@@ -42,13 +42,13 @@ class DossierService {
   }
 
   async createCase(data: any): Promise<Case> {
-    const res = await axios.post(`${API_BASE}/dossiers`, null, {
-        params: {
-            title: data.title,
-            case_type: data.type,
-            jurisdiction: data.jurisdiction,
-            description: data.description
-        }
+    const res = await axios.post(`${API_BASE}/dossiers`, {
+      title: data.title,
+      case_type: data.case_type || data.type,
+      jurisdiction: data.jurisdiction,
+      description: data.description,
+      creator_bypass: data.creator_bypass,
+      firm_division: data.firm_division,
     });
     return res.data;
   }
