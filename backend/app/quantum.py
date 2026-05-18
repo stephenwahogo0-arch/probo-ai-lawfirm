@@ -1,7 +1,13 @@
 
-from qiskit_ibm_runtime import QiskitRuntimeService, SamplerV2 as Sampler
-from qiskit import QuantumCircuit
 import os
+
+try:
+    from qiskit import QuantumCircuit
+    from qiskit_ibm_runtime import QiskitRuntimeService, SamplerV2 as Sampler
+except ImportError:
+    QuantumCircuit = None
+    QiskitRuntimeService = None
+    Sampler = None
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -9,6 +15,11 @@ load_dotenv()
 class QuantumLawEngine:
     def __init__(self):
         self.api_key = os.getenv("IBM_QUANTUM_TOKEN")
+        if QiskitRuntimeService is None or not self.api_key:
+            print("Quantum Service Warning: qiskit or IBM_QUANTUM_TOKEN missing. Falling back to simulator mode.")
+            self.service = None
+            return
+
         try:
             self.service = QiskitRuntimeService(channel="ibm_quantum", token=self.api_key)
         except Exception as e:
@@ -16,7 +27,7 @@ class QuantumLawEngine:
             self.service = None
 
     def collapse_probability_space(self, case_id: str, data_vector: list):
-        if not self.service:
+        if not self.service or QuantumCircuit is None or Sampler is None:
             return {"status": "Simulated Collapse", "probability": 0.9999}
 
         qc = QuantumCircuit(2)

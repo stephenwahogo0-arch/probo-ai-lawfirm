@@ -1,6 +1,12 @@
 [build]
-  command = "npm run build"
+  command = "npm ci && npm run build"
   publish = "dist"
+
+[[redirects]]
+  from = "/vortex-api/*"
+  to = "https://probo-law-backend.onrender.com/:splat"
+  status = 200
+  force = true
 
 [[redirects]]
   from = "/*"

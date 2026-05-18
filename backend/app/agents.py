@@ -2,8 +2,6 @@ import uuid
 import datetime
 import random
 from .database import supabase
-from eth_account import Account
-from typing import Dict, List
 from .bittensor_sim import bittensor_sim
 
 # --- Exhaustive Role Descriptions from User ---

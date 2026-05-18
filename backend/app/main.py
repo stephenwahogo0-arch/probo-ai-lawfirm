@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, BackgroundTasks
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from .database import supabase, init_db
 from .agents import agent_manager
@@ -24,6 +24,13 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def strip_vortex_api_prefix(request: Request, call_next):
+    if request.scope["path"].startswith("/vortex-api"):
+        request.scope["path"] = request.scope["path"].removeprefix("/vortex-api") or "/"
+    return await call_next(request)
 
 class CaseCreate(BaseModel):
     title: str
