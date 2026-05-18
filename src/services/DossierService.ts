@@ -42,15 +42,23 @@ class DossierService {
   }
 
   async createCase(data: any): Promise<Case> {
-    const res = await axios.post(`${API_BASE}/dossiers`, null, {
+    try {
+      const res = await axios.post(`${API_BASE}/dossiers`, null, {
         params: {
-            title: data.title,
-            case_type: data.type,
-            jurisdiction: data.jurisdiction,
-            description: data.description
+          title: data.title,
+          case_type: data.type || data.case_type,
+          jurisdiction: data.jurisdiction,
+          description: data.description,
+          creator_bypass: data.creator_bypass || false,
+          firm_division: data.firm_division || 'Corporate'
         }
-    });
-    return res.data;
+      });
+      console.log("[v0] Case created via service:", res.data);
+      return res.data;
+    } catch (err) {
+      console.error("[v0] DossierService.createCase error:", err);
+      throw err;
+    }
   }
 
   async commitPayment(id: string): Promise<void> {

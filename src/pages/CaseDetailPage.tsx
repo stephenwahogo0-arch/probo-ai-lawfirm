@@ -1,6 +1,7 @@
 import type { Case } from "@/types";
 import { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { supabase } from '@/lib/supabase';
 import { 
   ArrowLeft, Scale, ShieldCheck, Zap, Globe, 
   CreditCard, Wallet, Landmark, Bitcoin, Loader2, Send, Bot, User, Briefcase, Shield, Heart 
@@ -26,13 +27,24 @@ export default function CaseDetailPage() {
   const userFirm = localStorage.getItem('user_firm') || 'Corporate';
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_BASE || '/vortex-api'}/dossiers`)
-      .then(res => res.json())
-      .then(data => {
-        const c = data.find((x: any) => x.id === id);
-        setCaseData(c);
+    const fetchCase = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('dossiers')
+          .select('*')
+          .eq('id', id)
+          .single();
+        
+        if (error) throw error;
+        setCaseData(data);
+      } catch (err) {
+        console.error("[v0] Error fetching case:", err);
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+    
+    fetchCase();
   }, [id]);
 
   useEffect(() => {
@@ -41,10 +53,22 @@ export default function CaseDetailPage() {
 
   const handleCommit = async () => {
     setCommitting(true);
-    const email = localStorage.getItem('user_email');
-    await fetch(`${import.meta.env.VITE_API_BASE || '/vortex-api'}/dossiers/${id}/commit?email=${email}`, { method: 'POST' });
-    if (caseData) setCaseData({ ...caseData, payment_committed: true });
-    setCommitting(false);
+    try {
+      const { error } = await supabase
+        .from('dossiers')
+        .update({ payment_committed: true })
+        .eq('id', id);
+      
+      if (error) throw error;
+      
+      if (caseData) {
+        setCaseData({ ...caseData, payment_committed: true });
+      }
+    } catch (err) {
+      console.error("[v0] Error committing payment:", err);
+    } finally {
+      setCommitting(false);
+    }
   };
 
   const handleSend = async () => {

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { supabase } from '@/lib/supabase';
 
 const CASE_TYPES = ['Criminal Law', 'Civil Law', 'Corporate Law', 'Constitutional Law', 'IP Law', 'Family Law'];
 
@@ -24,22 +25,41 @@ export default function NewCasePage() {
     e.preventDefault();
     setLoading(true);
     
-    const isCreator = localStorage.getItem('user_email') === 'stephenwahogoka0@gmail.com';
-    
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE || '/vortex-api'}/dossiers`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          ...form, 
-          creator_bypass: isCreator,
-          firm_division: userFirm 
-        })
-      });
-      const data = await res.json();
-      navigate(`/cases/${data.id}`);
+      console.log("[v0] Submitting form with data:", form);
+      
+      // Create case directly via Supabase
+      const { data, error } = await supabase
+        .from('dossiers')
+        .insert([
+          {
+            title: form.title,
+            case_type: form.case_type,
+            jurisdiction: form.jurisdiction,
+            description: form.description,
+            report: `QUANTUM ANALYSIS INITIATED\nCase Type: ${form.case_type}\nJurisdiction: ${form.jurisdiction}\n\nVORTEX SYSTEM: Analyzing case probability space...`,
+            status: 'Complete',
+            payment_committed: false,
+            created_at: new Date().toISOString()
+          }
+        ])
+        .select('*')
+        .single();
+      
+      if (error) {
+        console.error("[v0] Supabase insert error:", error);
+        alert(`Error creating case: ${error.message}`);
+        setLoading(false);
+        return;
+      }
+      
+      if (data) {
+        console.log("[v0] Case created successfully:", data);
+        navigate(`/cases/${data.id}`);
+      }
     } catch (err) {
-      console.error(err);
+      console.error("[v0] Case creation error:", err);
+      alert(`Error: ${err instanceof Error ? err.message : 'Unknown error'}`);
       setLoading(false);
     }
   };
