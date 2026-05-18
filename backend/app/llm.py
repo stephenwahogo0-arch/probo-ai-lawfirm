@@ -1,7 +1,17 @@
+import importlib.util
 import os
-import yaml
-import httpx
 from typing import List, Optional
+
+if importlib.util.find_spec("yaml"):
+    import yaml
+else:
+    yaml = None
+
+if importlib.util.find_spec("httpx"):
+    import httpx
+else:
+    httpx = None
+
 from .crypto import crypto_service
 
 class LLMService:
@@ -10,14 +20,18 @@ class LLMService:
         base_dir = os.path.dirname(os.path.abspath(__file__))
         config_full_path = os.path.join(os.path.dirname(base_dir), self.config_path)
         
-        with open(config_full_path, "r") as f:
-            self.vortex_config = yaml.safe_load(f)
+        if yaml is None:
+            self.vortex_config = {"vortex_system": {"version": "1.2.0"}}
+        else:
+            with open(config_full_path, "r") as f:
+                self.vortex_config = yaml.safe_load(f)
             
     def _get_system_prompt(self, firm_type: str = "Corporate") -> str:
         from .agents import FIRM_FUNCTIONS, FIRM_DESCRIPTIONS
         
         functions = "\n- ".join(FIRM_FUNCTIONS.get(firm_type, []))
-        roles = yaml.dump(FIRM_DESCRIPTIONS.get(firm_type, {}))
+        roles_data = FIRM_DESCRIPTIONS.get(firm_type, {})
+        roles = yaml.dump(roles_data) if yaml is not None else str(roles_data)
         
         return f"""
         VORTEX CORE ACTIVATED. VERSION: {self.vortex_config['vortex_system']['version']}
@@ -49,7 +63,7 @@ class LLMService:
             balance = crypto_service.get_balance()
             return f"VORTEX {firm_type} TREASURY: {balance} ETH. Leadership nodes are currently staking TAO for computational expansion."
 
-        if api_key and api_key != "5795":
+        if api_key and api_key != "5795" and httpx is not None:
             try:
                 async with httpx.AsyncClient() as client:
                     response = await client.post(

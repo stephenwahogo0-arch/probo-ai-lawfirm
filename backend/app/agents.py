@@ -5,7 +5,10 @@ import os
 import uuid
 from typing import Any
 
-import httpx
+if importlib.util.find_spec("httpx"):
+    import httpx
+else:
+    httpx = None
 
 from .bittensor_sim import bittensor_sim
 from .crypto import crypto_service
@@ -311,6 +314,15 @@ class AgentManager:
         agent = next((item for item in self.major_agents if item["id"] == agent_id), None)
         if not agent:
             return {"status": "error", "message": "Unknown major agent."}
+        if httpx is None:
+            return {
+                "status": "dependency_required",
+                "message": "Install httpx to claim real external bounties.",
+                "agent": agent["name"],
+                "job_id": job_id,
+                "payout_wallets": ADMIN_PAYOUT_WALLETS,
+            }
+
         if not api_url or not api_key:
             return {
                 "status": "configuration_required",

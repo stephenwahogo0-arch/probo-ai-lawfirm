@@ -3,7 +3,11 @@ import os
 from copy import deepcopy
 from typing import Any, Optional
 
-from dotenv import load_dotenv
+if importlib.util.find_spec("dotenv"):
+    from dotenv import load_dotenv
+else:
+    def load_dotenv(*_args: Any, **_kwargs: Any):
+        return False
 
 if importlib.util.find_spec("supabase"):
     from supabase import Client, create_client

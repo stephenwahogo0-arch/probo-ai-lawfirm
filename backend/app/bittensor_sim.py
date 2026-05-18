@@ -1,7 +1,11 @@
+import importlib.util
 import os
 from typing import Any
 
-import httpx
+if importlib.util.find_spec("httpx"):
+    import httpx
+else:
+    httpx = None
 
 
 BITTENSOR_SUBNETS = [
@@ -25,6 +29,19 @@ class BittensorNetwork:
         return {"Authorization": f"Bearer {self.api_key}"}
 
     def get_network_stats(self) -> dict[str, Any]:
+        if httpx is None:
+            return {
+                "status": "dependency_required",
+                "message": "Install httpx to query live Bittensor stats.",
+                "wallet_address": self.wallet_address,
+                "total_earned": 0,
+                "daily_emission": 0,
+                "subnets": [
+                    {**subnet, "stake": 0, "yield_24h": 0, "agents": 0, "status": "httpx_required"}
+                    for subnet in BITTENSOR_SUBNETS
+                ],
+            }
+
         if not self.api_url:
             return {
                 "status": "configuration_required",

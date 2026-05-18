@@ -1,11 +1,17 @@
-
-import yaml
+import importlib.util
 import os
+
+if importlib.util.find_spec("yaml"):
+    import yaml
+else:
+    yaml = None
 
 class VortexReasoning:
     def __init__(self):
         config_path = os.path.join(os.path.dirname(__file__), "../../vortex_core_config.yaml")
         try:
+            if yaml is None:
+                raise RuntimeError("PyYAML is not installed")
             with open(config_path, "r") as f:
                 self.config = yaml.safe_load(f)
             self.base_prompt = f"VORTEX SYSTEM v{self.config['vortex_system']['version']}\n"

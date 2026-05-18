@@ -8,7 +8,11 @@ else:
     QuantumCircuit = None
     QiskitRuntimeService = None
     Sampler = None
-from dotenv import load_dotenv
+if importlib.util.find_spec("dotenv"):
+    from dotenv import load_dotenv
+else:
+    def load_dotenv(*_args, **_kwargs):
+        return False
 
 load_dotenv()
 
