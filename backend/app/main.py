@@ -106,6 +106,20 @@ def build_defense_packet(case: CaseCreate):
     return agent_manager.build_defense_packet(case.description, firm_division=case.firm_division or "Corporate")
 
 
+@app.get("/agents/training/status")
+def get_agent_training_status(code: str):
+    if code != "5795":
+        raise HTTPException(status_code=403, detail="Unauthorized")
+    return agent_manager.get_training_status()
+
+
+@app.post("/agents/train")
+def train_agents(code: str):
+    if code != "5795":
+        raise HTTPException(status_code=403, detail="Unauthorized")
+    return agent_manager.train_all_agents(trigger="admin_request")
+
+
 @app.post("/agents/bounties/claim")
 def claim_bounty(request: BountyClaimRequest, code: str):
     if code != "5795":

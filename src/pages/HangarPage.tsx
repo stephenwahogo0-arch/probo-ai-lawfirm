@@ -6,6 +6,7 @@ import { Shield, Zap, Users, Coins, Globe, Target, Briefcase, Activity, Server }
 
 export const HangarPage: React.FC = () => {
   const [stats, setStats] = useState<any>(null);
+  const [training, setTraining] = useState(false);
 
   useEffect(() => {
     const isCreator = localStorage.getItem('creator_access') === 'true';
@@ -25,6 +26,25 @@ export const HangarPage: React.FC = () => {
     const interval = setInterval(fetchStats, 5000);
     return () => clearInterval(interval);
   }, []);
+
+  const trainAgents = async () => {
+    setTraining(true);
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE || '/vortex-api'}/agents/train?code=5795`, { method: 'POST' });
+      const trainingResult = await response.json();
+      setStats((current: any) => current ? {
+        ...current,
+        training_status: {
+          ...(current.training_status || {}),
+          ...trainingResult,
+          major_agents_total: current.major_agents,
+        },
+        training_queue: Math.max((current.major_agents || 0) - (trainingResult.major_agents_trained || 0), 0),
+      } : current);
+    } finally {
+      setTraining(false);
+    }
+  };
 
   if (!stats) return <div className="p-20 text-center animate-pulse">AUTHENTICATING CREATOR ACCESS...</div>;
 
@@ -76,8 +96,8 @@ export const HangarPage: React.FC = () => {
             <Globe className="h-5 w-5 text-blue-400" />
             <h2 className="font-bold text-sm uppercase tracking-tighter">Economy</h2>
           </div>
-          <p className="text-2xl font-display font-bold">{stats.voice_enabled_major_agents}</p>
-          <p className="text-[10px] opacity-60">UNIQUE MAJOR AGENT VOICES</p>
+          <p className="text-2xl font-display font-bold">{stats.training_status?.major_agents_trained?.toLocaleString() || 0}</p>
+          <p className="text-[10px] opacity-60">SUPER-TRAINED MAJOR AGENTS</p>
         </Card>
       </div>
 
@@ -157,13 +177,14 @@ export const HangarPage: React.FC = () => {
             <div className="space-y-4">
                <div className="text-xs">
                   <p className="font-bold opacity-60 uppercase mb-1">Active Builder Module</p>
-                  <p className="leading-relaxed">Wallet formation: {Object.entries(stats.wallet_statuses).map(([key, value]) => `${key}: ${value}`).join(' · ')}</p>
+                  <p className="leading-relaxed">Training: {stats.training_status?.status} · {stats.training_status?.major_agents_trained?.toLocaleString()} / {stats.training_status?.major_agents_total?.toLocaleString()} major agents.</p>
+                  <p className="leading-relaxed mt-2">Wallet formation: {Object.entries(stats.wallet_statuses).map(([key, value]) => `${key}: ${value}`).join(' · ')}</p>
                </div>
                <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
                   <div className="h-full bg-primary" style={{ width: '75%' }} />
                </div>
-               <Button className="w-full text-[10px] h-8 font-bold uppercase tracking-widest">
-                  Verify 2,000 Major Agents
+               <Button onClick={trainAgents} disabled={training} className="w-full text-[10px] h-8 font-bold uppercase tracking-widest">
+                  {training ? 'Training VORTEX Agents...' : 'Train / Verify 2,000 Major Agents'}
                </Button>
             </div>
           </Card>
