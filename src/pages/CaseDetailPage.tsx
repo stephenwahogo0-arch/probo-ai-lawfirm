@@ -146,8 +146,9 @@ export default function CaseDetailPage() {
                    placeholder="Query the Division Counsel..." 
                    disabled={sending}
                    className="bg-background h-12"
+                   aria-label="Chat message"
                  />
-                 <Button onClick={handleSend} disabled={sending || !input.trim()} className="h-12 w-12 p-0">
+                 <Button onClick={handleSend} disabled={sending || !input.trim()} className="h-12 w-12 p-0" aria-label="Send message">
                     {sending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
                  </Button>
               </div>
